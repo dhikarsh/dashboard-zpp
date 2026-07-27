@@ -5,156 +5,499 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Dashboard ZPP</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
-  <!-- Supabase JS -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    /* ===== S T Y L E  (sama seperti sebelumnya, hanya sedikit modifikasi) ===== */
+    /* ============================================================
+       DESIGN SYSTEM (Lebih keren & modern)
+       ============================================================ */
     :root {
-      --primary: #8B5CF6;
-      --primary-dark: #7C3AED;
-      --primary-light: #EDE9FE;
+      --primary: #6366F1;
+      --primary-dark: #4F46E5;
+      --primary-light: #EEF2FF;
       --accent-magenta: #D946EF;
       --accent-cyan: #06B6D4;
+      --accent-rose: #F43F5E;
       --success: #10B981;
       --warning: #F59E0B;
       --danger: #EF4444;
-      --bg: #F5F3FF;
+      --bg: #F8FAFC;
       --surface: #FFFFFF;
       --border: #E2E8F0;
-      --text-main: #1E293B;
+      --text-main: #0F172A;
       --text-muted: #64748B;
-      --radius: 16px;
-      --shadow: 0 4px 15px rgba(139, 92, 246, 0.08);
+      --radius: 20px;
+      --shadow: 0 8px 30px rgba(99, 102, 241, 0.08);
+      --shadow-hover: 0 12px 40px rgba(99, 102, 241, 0.15);
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text-main); font-size: 13px; padding-bottom: 60px; line-height: 1.5; }
-    
-    .header { background: var(--primary); color: white; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2); position: sticky; top: 0; z-index: 100; }
-    .brand { display: flex; align-items: center; gap: 12px; font-size: 16px; font-weight: 800; letter-spacing: -0.5px; }
-    .brand-icon { background: rgba(255,255,255,0.2); width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
-    
-    .container { padding: 20px; max-width: 1440px; margin: 0 auto; }
-    .filter-bar { background: var(--surface); padding: 16px; border-radius: var(--radius); display: flex; gap: 12px; margin-bottom: 20px; box-shadow: var(--shadow); flex-wrap: wrap; align-items: flex-end; }
-    .field { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 150px; }
-    .field label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
-    .field input, .field select { padding: 10px 12px; border: 1px solid #E2E8F0; border-radius: 10px; font-family: inherit; font-size: 13px; outline: none; background: #F8FAFC; color: var(--text-main); font-weight: 600;}
-    .field input:focus, .field select:focus { border-color: var(--primary); background: #FFFFFF; }
+    body { 
+      font-family: 'Inter', -apple-system, sans-serif; 
+      background: var(--bg); 
+      color: var(--text-main); 
+      font-size: 13px; 
+      padding-bottom: 40px; 
+      line-height: 1.6;
+    }
 
-    .section-wrapper { margin-bottom: 24px; background: transparent; }
-    .section-header { background: var(--surface); padding: 16px 20px; border-radius: var(--radius); display: flex; justify-content: space-between; align-items: center; cursor: pointer; box-shadow: var(--shadow); margin-bottom: 12px; transition: 0.2s; border: 1px solid transparent; }
-    .section-header:hover { border-color: var(--primary-light); }
-    .section-title { font-size: 15px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 10px; margin: 0; }
-    .section-title i { color: var(--primary); font-size: 18px; }
-    .toggle-btn { background: var(--primary-light); color: var(--primary-dark); border: none; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; transition: 0.3s; }
-    .section-content { display: block; animation: fadeIn 0.3s ease-in-out; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+    /* ----- HEADER ----- */
+    .header {
+      background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 50%, #D946EF 100%);
+      color: white;
+      padding: 18px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      backdrop-filter: blur(10px);
+    }
+    .brand { 
+      display: flex; 
+      align-items: center; 
+      gap: 14px; 
+      font-size: 18px; 
+      font-weight: 900; 
+      letter-spacing: -0.5px; 
+    }
+    .brand-icon { 
+      background: rgba(255,255,255,0.2); 
+      width: 42px; 
+      height: 42px; 
+      border-radius: 12px; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      font-size: 20px; 
+      backdrop-filter: blur(4px);
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 12px;
+      font-weight: 600;
+      opacity: 0.9;
+    }
+    .header-right .badge-live {
+      background: rgba(255,255,255,0.2);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .header-right .badge-live i {
+      font-size: 8px;
+      color: #34D399;
+      animation: pulse-dot 1.5s ease-in-out infinite;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
 
-    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 16px; }
-    .card { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); display: flex; flex-direction: column; overflow: hidden; }
-    .kpi-card { padding: 16px; display: flex; align-items: center; gap: 16px; }
-    .kpi-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
-    .kpi-icon.violet { background: var(--primary); color: white; }
-    .kpi-icon.magenta { background: var(--accent-magenta); color: white; }
-    .kpi-icon.cyan { background: var(--accent-cyan); color: white; }
-    .kpi-icon.green { background: var(--success); color: white; }
-    .kpi-val { font-size: 18px; font-weight: 800; color: var(--text-main); margin: 2px 0; }
-    .kpi-lbl { font-size: 11px; font-weight: 700; color: var(--text-muted); }
+    /* ----- CONTAINER ----- */
+    .container { padding: 24px 28px; max-width: 1440px; margin: 0 auto; }
 
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
-    .card-header { padding: 16px; border-bottom: 1px solid var(--border); font-weight: 800; font-size: 13px; display: flex; justify-content: space-between; align-items: center; }
-    .card-body { padding: 16px; }
-    .chart-container { position: relative; width: 100%; height: 230px; }
+    /* ----- FILTER BAR ----- */
+    .filter-bar { 
+      background: var(--surface); 
+      padding: 18px 24px; 
+      border-radius: var(--radius); 
+      display: flex; 
+      gap: 16px; 
+      margin-bottom: 24px; 
+      box-shadow: var(--shadow); 
+      flex-wrap: wrap; 
+      align-items: flex-end; 
+      border: 1px solid rgba(99, 102, 241, 0.05);
+    }
+    .field { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 160px; }
+    .field label { 
+      font-size: 10px; 
+      font-weight: 800; 
+      color: var(--text-muted); 
+      text-transform: uppercase; 
+      letter-spacing: 0.5px;
+    }
+    .field input, .field select { 
+      padding: 10px 14px; 
+      border: 2px solid #F1F5F9; 
+      border-radius: 12px; 
+      font-family: inherit; 
+      font-size: 13px; 
+      outline: none; 
+      background: #F8FAFC; 
+      color: var(--text-main); 
+      font-weight: 600;
+      transition: var(--transition);
+    }
+    .field input:focus, .field select:focus { 
+      border-color: var(--primary); 
+      background: #FFFFFF; 
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #6366F1, #8B5CF6);
+      color: white;
+      border: none;
+      padding: 10px 24px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 44px;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
+    }
 
-    .table-responsive { overflow-x: auto; overflow-y: auto; max-height: 280px; -webkit-overflow-scrolling: touch; }
+    /* ----- SECTION ----- */
+    .section-wrapper { margin-bottom: 28px; }
+    .section-header { 
+      background: var(--surface); 
+      padding: 16px 24px; 
+      border-radius: var(--radius); 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      cursor: pointer; 
+      box-shadow: var(--shadow); 
+      margin-bottom: 16px; 
+      transition: var(--transition); 
+      border: 1px solid transparent;
+    }
+    .section-header:hover { 
+      border-color: var(--primary); 
+      box-shadow: var(--shadow-hover);
+    }
+    .section-title { 
+      font-size: 16px; 
+      font-weight: 800; 
+      display: flex; 
+      align-items: center; 
+      gap: 12px; 
+      margin: 0; 
+    }
+    .section-title i { 
+      color: var(--primary); 
+      font-size: 20px; 
+      width: 28px;
+      text-align: center;
+    }
+    .toggle-btn { 
+      background: var(--primary-light); 
+      color: var(--primary-dark); 
+      border: none; 
+      width: 34px; 
+      height: 34px; 
+      border-radius: 10px; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      font-size: 14px; 
+      cursor: pointer; 
+      transition: var(--transition); 
+    }
+    .toggle-btn:hover { background: var(--primary); color: white; }
+    .section-content { display: block; animation: fadeSlide 0.4s ease; }
+    @keyframes fadeSlide { 
+      from { opacity: 0; transform: translateY(-8px); } 
+      to { opacity: 1; transform: translateY(0); } 
+    }
+
+    /* ----- KPI GRID ----- */
+    .kpi-grid { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+      gap: 16px; 
+      margin-bottom: 20px; 
+    }
+    .card { 
+      background: var(--surface); 
+      border-radius: var(--radius); 
+      box-shadow: var(--shadow); 
+      overflow: hidden; 
+      transition: var(--transition); 
+      border: 1px solid rgba(99, 102, 241, 0.04);
+    }
+    .card:hover { box-shadow: var(--shadow-hover); transform: translateY(-2px); }
+    .kpi-card { 
+      padding: 20px 24px; 
+      display: flex; 
+      align-items: center; 
+      gap: 18px; 
+    }
+    .kpi-icon { 
+      width: 54px; 
+      height: 54px; 
+      border-radius: 14px; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      font-size: 22px; 
+      flex-shrink: 0; 
+    }
+    .kpi-icon.violet { background: linear-gradient(135deg, #6366F1, #8B5CF6); color: white; }
+    .kpi-icon.magenta { background: linear-gradient(135deg, #D946EF, #EC4899); color: white; }
+    .kpi-icon.cyan { background: linear-gradient(135deg, #06B6D4, #3B82F6); color: white; }
+    .kpi-icon.green { background: linear-gradient(135deg, #10B981, #34D399); color: white; }
+    .kpi-icon.rose { background: linear-gradient(135deg, #F43F5E, #FB7185); color: white; }
+    .kpi-val { font-size: 22px; font-weight: 900; color: var(--text-main); line-height: 1.2; }
+    .kpi-lbl { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.3px; }
+
+    /* ----- GRID 2 KOLOM ----- */
+    .grid-2 { 
+      display: grid; 
+      grid-template-columns: 1fr 1fr; 
+      gap: 18px; 
+      margin-bottom: 18px; 
+    }
+    .card-header { 
+      padding: 16px 20px; 
+      border-bottom: 1px solid var(--border); 
+      font-weight: 800; 
+      font-size: 13px; 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      color: var(--text-main);
+    }
+    .card-header i { color: var(--primary); }
+    .card-body { padding: 18px 20px; }
+    .chart-container { position: relative; width: 100%; height: 240px; }
+
+    /* ----- TABEL ----- */
+    .table-responsive { 
+      overflow-x: auto; 
+      overflow-y: auto; 
+      max-height: 300px; 
+      -webkit-overflow-scrolling: touch; 
+    }
     table { width: 100%; border-collapse: collapse; font-size: 12px; text-align: left; min-width: 500px; }
-    .table-responsive thead th { position: sticky; top: 0; background: var(--surface); z-index: 10; border-bottom: 2px solid var(--border); }
-    th { padding: 12px 10px; color: var(--text-muted); font-weight: 700; white-space: nowrap; }
-    td { padding: 12px 10px; border-bottom: 1px solid var(--border); }
-    
-    .badge { padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; display: inline-block; white-space: nowrap;}
-    .bg-g { background: #DCFCE7; color: #166534; } .bg-r { background: #FEE2E2; color: #991B1B; }
-    .bg-y { background: #FEF3C7; color: #92400E; } .bg-violet { background: var(--primary-light); color: var(--primary-dark); }
+    .table-responsive thead th { 
+      position: sticky; 
+      top: 0; 
+      background: #F8FAFC; 
+      z-index: 10; 
+      border-bottom: 2px solid var(--border); 
+      padding: 12px 14px;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+    }
+    th { padding: 12px 14px; font-weight: 700; white-space: nowrap; }
+    td { padding: 12px 14px; border-bottom: 1px solid var(--border); font-weight: 500; }
+
+    /* ----- BADGE ----- */
+    .badge { 
+      padding: 4px 12px; 
+      border-radius: 20px; 
+      font-size: 10px; 
+      font-weight: 700; 
+      display: inline-block; 
+      white-space: nowrap; 
+      letter-spacing: 0.2px;
+    }
+    .bg-g { background: #DCFCE7; color: #166534; } 
+    .bg-r { background: #FEE2E2; color: #991B1B; }
+    .bg-y { background: #FEF3C7; color: #92400E; } 
+    .bg-violet { background: var(--primary-light); color: var(--primary-dark); }
+    .bg-rose { background: #FFE4E6; color: #9F1239; }
+    .bg-cyan { background: #CFFAFE; color: #0E7490; }
     .c-magenta { color: var(--accent-magenta); font-weight: 800; }
 
-    .alert { padding: 10px 14px; border-radius: 10px; font-weight: 700; font-size: 11px; margin-bottom: 8px; display: flex; gap: 10px; align-items: center;}
-    .a-info { background: #F0FDF4; color: #15803D; border: 1px solid #BBF7D0; }
-    
-    #loading { text-align: center; padding: 15vh 20px; font-size: 16px; font-weight: 700; color: var(--primary); display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    /* ----- ALERT / NOTIF ----- */
+    .alert { 
+      padding: 10px 16px; 
+      border-radius: 12px; 
+      font-weight: 600; 
+      font-size: 11px; 
+      margin-bottom: 8px; 
+      display: flex; 
+      gap: 12px; 
+      align-items: center; 
+      border: 1px solid transparent;
+    }
+    .a-info { background: #F0FDF4; color: #15803D; border-color: #BBF7D0; }
 
+    /* ----- LOADING ----- */
+    #loading { 
+      text-align: center; 
+      padding: 20vh 20px; 
+      font-size: 16px; 
+      font-weight: 700; 
+      color: var(--primary); 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      gap: 16px; 
+    }
+    #loading .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid var(--primary-light);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ----- RESPONSIVE ----- */
+    @media (max-width: 1024px) {
+      .grid-2 { grid-template-columns: 1fr; gap: 16px; }
+    }
     @media (max-width: 768px) {
-      .header { padding: 12px 16px; }
-      .brand { font-size: 14px; }
-      .brand-icon { width: 32px; height: 32px; font-size: 14px; }
-      .container { padding: 12px; }
-      .filter-bar { flex-direction: column; align-items: stretch; gap: 10px; padding: 12px; }
+      .header { padding: 14px 18px; flex-direction: column; gap: 8px; }
+      .brand { font-size: 15px; }
+      .brand-icon { width: 36px; height: 36px; font-size: 16px; }
+      .container { padding: 16px; }
+      .filter-bar { flex-direction: column; align-items: stretch; gap: 10px; padding: 16px; }
       .field { min-width: 100%; }
-      .kpi-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
-      .kpi-card { flex-direction: column; text-align: center; padding: 16px 12px; gap: 8px; }
-      .kpi-val { font-size: 16px; }
-      .grid-2 { grid-template-columns: 1fr; gap: 12px; }
+      .kpi-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+      .kpi-card { flex-direction: column; text-align: center; padding: 16px; gap: 8px; }
+      .kpi-val { font-size: 18px; }
       .section-header { padding: 12px 16px; }
       .chart-container { height: 200px; }
+      .header-right .badge-live { display: none; }
+    }
+    @media (max-width: 480px) {
+      .kpi-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
 
   <div class="header">
-    <div class="brand"><div class="brand-icon"><i class="fa-solid fa-mobile-screen-button"></i></div> Dashboard ZPP</div>
-    <div style="font-size: 11px; font-weight: 700; opacity: 0.9;" id="lastUpdate">Supabase Engine</div>
+    <div class="brand">
+      <div class="brand-icon"><i class="fa-solid fa-bolt"></i></div>
+      Dashboard ZPP
+    </div>
+    <div class="header-right">
+      <span class="badge-live"><i class="fa-solid fa-circle"></i> Live</span>
+      <span id="lastUpdate"><i class="fa-regular fa-clock"></i> Supabase</span>
+    </div>
   </div>
 
   <div class="container">
+
+    <!-- FILTER BAR -->
     <div class="filter-bar">
-      <div class="field"><label>Dari Tanggal</label><input type="date" id="startDate" onchange="runEngine()"></div>
-      <div class="field"><label>Sampai Tanggal</label><input type="date" id="endDate" onchange="runEngine()"></div>
-      <div class="field"><label>Filter Reseller</label><select id="resellerFilter" onchange="runEngine()"><option value="">Semua Reseller</option></select></div>
+      <div class="field">
+        <label><i class="fa-regular fa-calendar"></i> Dari</label>
+        <input type="date" id="startDate" onchange="runEngine()">
+      </div>
+      <div class="field">
+        <label><i class="fa-regular fa-calendar"></i> Sampai</label>
+        <input type="date" id="endDate" onchange="runEngine()">
+      </div>
+      <div class="field">
+        <label><i class="fa-solid fa-user"></i> Reseller</label>
+        <select id="resellerFilter" onchange="runEngine()">
+          <option value="">Semua Reseller</option>
+        </select>
+      </div>
+      <button class="btn-primary" onclick="runEngine()">
+        <i class="fa-solid fa-rotate"></i> Refresh
+      </button>
     </div>
 
-    <div id="loading"><i class="fa-solid fa-circle-notch fa-spin fa-2x"></i> <span>Memuat data dari Supabase...</span></div>
+    <!-- LOADING -->
+    <div id="loading">
+      <div class="spinner"></div>
+      <span>Memuat data dari Supabase...</span>
+    </div>
 
+    <!-- DASHBOARD CONTENT -->
     <div id="dashboardContent" style="display:none;">
-      <!-- Sama seperti sebelumnya, struktur section -->
+
+      <!-- ===== SECTION 1: EKSEKUTIF ===== -->
       <div class="section-wrapper">
         <div class="section-header" onclick="toggleSection('sec-exec')">
-          <h2 class="section-title"><i class="fa-solid fa-chart-pie"></i> Summary</h2>
+          <h2 class="section-title"><i class="fa-solid fa-chart-pie"></i> Ringkasan Eksekutif</h2>
           <button class="toggle-btn"><i class="fa-solid fa-chevron-up" id="icon-sec-exec"></i></button>
         </div>
         <div class="section-content" id="sec-exec">
           <div class="kpi-grid">
-            <div class="card kpi-card"><div class="kpi-icon violet"><i class="fa-solid fa-wallet"></i></div><div><div class="kpi-lbl">Omzet Total</div><div class="kpi-val" id="kpiOmzetTotal">0</div></div></div>
-            <div class="card kpi-card"><div class="kpi-icon magenta"><i class="fa-solid fa-chart-line"></i></div><div><div class="kpi-lbl">Total Laba</div><div class="kpi-val" id="kpiLabaTotal">0</div></div></div>
-            <div class="card kpi-card"><div class="kpi-icon cyan"><i class="fa-solid fa-list-check"></i></div><div><div class="kpi-lbl">Total Trx</div><div class="kpi-val" id="kpiTrxComp">0 / 0</div></div></div>
+            <div class="card kpi-card">
+              <div class="kpi-icon violet"><i class="fa-solid fa-wallet"></i></div>
+              <div><div class="kpi-lbl">Omzet Total</div><div class="kpi-val" id="kpiOmzetTotal">0</div></div>
+            </div>
+            <div class="card kpi-card">
+              <div class="kpi-icon magenta"><i class="fa-solid fa-chart-line"></i></div>
+              <div><div class="kpi-lbl">Total Laba</div><div class="kpi-val" id="kpiLabaTotal">0</div></div>
+            </div>
+            <div class="card kpi-card">
+              <div class="kpi-icon cyan"><i class="fa-solid fa-list-check"></i></div>
+              <div><div class="kpi-lbl">Total Transaksi</div><div class="kpi-val" id="kpiTrxTotal">0</div></div>
+            </div>
+            <div class="card kpi-card">
+              <div class="kpi-icon green"><i class="fa-solid fa-check-circle"></i></div>
+              <div><div class="kpi-lbl">Success Rate</div><div class="kpi-val" id="kpiSuccessRate">0%</div></div>
+            </div>
+            <div class="card kpi-card">
+              <div class="kpi-icon rose"><i class="fa-solid fa-users"></i></div>
+              <div><div class="kpi-lbl">Reseller Aktif</div><div class="kpi-val" id="kpiActiveReseller">0</div></div>
+            </div>
           </div>
-          <div class="grid-2">
-            <div class="card"><div class="card-header">Tren Global <i class="fa-solid fa-arrow-trend-up" style="color:var(--primary)"></i></div><div class="card-body"><div class="chart-container"><canvas id="c-trendTotal"></canvas></div></div></div>
-            <div class="card"><div class="card-header">Tren Reseller <i class="fa-solid fa-users" style="color:var(--accent-cyan)"></i></div><div class="card-body"><div class="chart-container"><canvas id="c-trendMulti"></canvas></div></div></div>
-          </div>
-        </div>
-      </div>
 
-      <div class="section-wrapper">
-        <div class="section-header" onclick="toggleSection('sec-sys')">
-          <h2 class="section-title"><i class="fa-solid fa-server"></i> System & Modul Detail</h2>
-          <button class="toggle-btn"><i class="fa-solid fa-chevron-up" id="icon-sec-sys"></i></button>
-        </div>
-        <div class="section-content" id="sec-sys">
           <div class="grid-2">
-            <div class="card"><div class="card-header">Status Trx</div><div class="card-body"><div class="chart-container"><canvas id="c-status"></canvas></div></div></div>
-            <div class="card"><div class="card-header">Volume Trx vs Error Rate (Per Jam)</div><div class="card-body"><div class="chart-container"><canvas id="c-dualAxis"></canvas></div></div></div>
-          </div>
-          <div class="card">
-            <div class="card-header">Efisiensi Modul & Detail Status per Gateway</div>
-            <div class="card-body table-responsive">
-              <table><thead><tr><th>Nama Modul</th><th>Total Trx</th><th>Sukses</th><th>Gagal</th><th>Timeout</th><th>Success Rate</th><th>Latency (detik)</th><th>Status</th></tr></thead><tbody id="tbl-gateway"></tbody></table>
+            <div class="card">
+              <div class="card-header"><i class="fa-solid fa-arrow-trend-up"></i> Tren Omzet Global</div>
+              <div class="card-body"><div class="chart-container"><canvas id="c-trendTotal"></canvas></div></div>
+            </div>
+            <div class="card">
+              <div class="card-header"><i class="fa-solid fa-users"></i> Tren Top 5 Reseller</div>
+              <div class="card-body"><div class="chart-container"><canvas id="c-trendMulti"></canvas></div></div>
             </div>
           </div>
         </div>
       </div>
 
+      <!-- ===== SECTION 2: SYSTEM ===== -->
+      <div class="section-wrapper">
+        <div class="section-header" onclick="toggleSection('sec-sys')">
+          <h2 class="section-title"><i class="fa-solid fa-server"></i> System & Modul Health</h2>
+          <button class="toggle-btn"><i class="fa-solid fa-chevron-up" id="icon-sec-sys"></i></button>
+        </div>
+        <div class="section-content" id="sec-sys">
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-header"><i class="fa-solid fa-chart-pie"></i> Distribusi Status</div>
+              <div class="card-body"><div class="chart-container"><canvas id="c-status"></canvas></div></div>
+            </div>
+            <div class="card">
+              <div class="card-header"><i class="fa-solid fa-chart-bar"></i> Volume vs Error Rate (Per Jam)</div>
+              <div class="card-body"><div class="chart-container"><canvas id="c-dualAxis"></canvas></div></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><i class="fa-solid fa-microchip"></i> Efisiensi Modul</div>
+            <div class="card-body table-responsive">
+              <table>
+                <thead><tr><th>Modul</th><th>Total</th><th>Sukses</th><th>Gagal</th><th>Timeout</th><th>Success Rate</th><th>Latency (detik)</th><th>Status</th></tr></thead>
+                <tbody id="tbl-gateway"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== SECTION 3: PRODUK & FINANSIAL ===== -->
       <div class="section-wrapper">
         <div class="section-header" onclick="toggleSection('sec-prod')">
           <h2 class="section-title"><i class="fa-solid fa-box-open"></i> Finansial & Produk</h2>
@@ -162,55 +505,90 @@
         </div>
         <div class="section-content" id="sec-prod">
           <div class="grid-2">
-            <div class="card"><div class="card-header">Pola Hari (Omzet)</div><div class="card-body"><div class="chart-container"><canvas id="c-dayWeek"></canvas></div></div></div>
-            <div class="card"><div class="card-header">Tren Top-Up <i class="fa-solid fa-arrow-up-right-dots" style="color:var(--accent-cyan)"></i></div><div class="card-body"><div class="chart-container"><canvas id="c-topupTrend"></canvas></div></div></div>
+            <div class="card">
+              <div class="card-header"><i class="fa-regular fa-calendar"></i> Pola Hari (Omzet)</div>
+              <div class="card-body"><div class="chart-container"><canvas id="c-dayWeek"></canvas></div></div>
+            </div>
+            <div class="card">
+              <div class="card-header"><i class="fa-solid fa-arrow-up-right-dots"></i> Tren Top-Up</div>
+              <div class="card-body"><div class="chart-container"><canvas id="c-topupTrend"></canvas></div></div>
+            </div>
           </div>
           <div class="grid-2">
-            <div class="card"><div class="card-header"><span style="color:var(--danger)"><i class="fa-solid fa-skull"></i> Trx vs Margin</span></div><div class="card-body table-responsive"><table><thead><tr><th>Produk</th><th>Total Trx</th><th>HPP Terakhir</th><th>Margin ROI</th></tr></thead><tbody id="tbl-zombie"></tbody></table></div></div>
-            <div class="card"><div class="card-header"><i class="fa-solid fa-money-bill-transfer"></i> History Top Up Per Reseller</div><div class="card-body table-responsive" id="topupBox" style="padding-top:10px;"></div></div>
+            <div class="card">
+              <div class="card-header"><i class="fa-solid fa-skull" style="color:var(--danger);"></i> Produk Zombie (Margin < 0.5%)</div>
+              <div class="card-body table-responsive">
+                <table>
+                  <thead><tr><th>Produk</th><th>Total Trx</th><th>HPP Rata-rata</th><th>Margin ROI</th></tr></thead>
+                  <tbody id="tbl-zombie"></tbody>
+                </table>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header"><i class="fa-solid fa-money-bill-transfer"></i> History Top-Up</div>
+              <div class="card-body" id="topupBox" style="max-height:260px; overflow-y:auto; padding:10px 0;"></div>
+            </div>
           </div>
         </div>
       </div>
 
+      <!-- ===== SECTION 4: RESELLER ===== -->
       <div class="section-wrapper">
         <div class="section-header" onclick="toggleSection('sec-sales')">
           <h2 class="section-title"><i class="fa-solid fa-users-rays"></i> Reseller Analytics</h2>
           <button class="toggle-btn"><i class="fa-solid fa-chevron-up" id="icon-sec-sales"></i></button>
         </div>
         <div class="section-content" id="sec-sales">
-          <div class="card" style="margin-bottom:16px;"><div class="card-header"><span class="c-magenta"><i class="fa-solid fa-stopwatch"></i> Velocity Tracker</span></div><div class="card-body table-responsive"><table><thead><tr><th>Reseller</th><th>Trx 7 Hr Terakhir</th><th>Trx 7-14 Hr Sblmnya</th><th>WoW</th><th>Produk Spesialis</th></tr></thead><tbody id="tbl-velocity"></tbody></table></div></div>
-          <div class="card"><div class="card-header">Segmentasi Reseller & Analisis Detail Performa</div><div class="card-body table-responsive"><table><thead><tr><th>Reseller</th><th>Tier</th><th>Total Trx</th><th>Laba</th><th>Avg Daily Trx</th><th>Aktif</th></tr></thead><tbody id="tbl-rfm"></tbody></table></div></div>
+          <div class="card" style="margin-bottom:18px;">
+            <div class="card-header"><i class="fa-solid fa-stopwatch c-magenta"></i> Velocity Tracker (WoW)</div>
+            <div class="card-body table-responsive">
+              <table>
+                <thead><tr><th>Reseller</th><th>7 Hari Terakhir</th><th>7-14 Hari Lalu</th><th>WoW</th><th>Spesialisasi</th></tr></thead>
+                <tbody id="tbl-velocity"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><i class="fa-solid fa-layer-group"></i> Segmentasi & Performa</div>
+            <div class="card-body table-responsive">
+              <table>
+                <thead><tr><th>Reseller</th><th>Tier</th><th>Total Trx</th><th>Laba</th><th>Avg Daily</th><th>Aktif</th></tr></thead>
+                <tbody id="tbl-rfm"></tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
+
+    </div><!-- /dashboardContent -->
+  </div><!-- /container -->
 
   <script>
-    // ========================================================
+    // ============================================================
     // KONFIGURASI SUPABASE (GANTI DENGAN MILIK ANDA)
-    // ========================================================
-    const SUPABASE_URL = 'https://smzvlyhfqgvocqckudss.supabase.co';   // Ganti dengan URL proyek Anda
-    const SUPABASE_ANON_KEY = 'sb_publishable_kwTA1M0rLb4sy-wuRWFGlQ_sbawszSM'; // Anon key
+    // ============================================================
+    const SUPABASE_URL = 'https://smzvlyhfqgvocqckudss.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_kwTA1M0rLb4sy-wuRWFGlQ_sbawszSM';
 
     const supabase = supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // ========================================================
+    // ============================================================
     // VARIABEL GLOBAL
-    // ========================================================
+    // ============================================================
     let charts = {};
-    let allData = [];          // menyimpan data mentah dari Supabase (setelah filter)
-    let resellerList = new Set();
+    let resellerList = [];
 
-    // ========================================================
+    // ============================================================
     // FUNGSI BANTUAN
-    // ========================================================
+    // ============================================================
     const rp = n => 'Rp ' + Math.round(n || 0).toLocaleString('id-ID');
     const toDateInput = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    const getDaysArr = () => ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+    const daysName = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 
     function toggleSection(id) {
       const el = document.getElementById(id);
       const icon = document.getElementById('icon-' + id);
+      if (!el || !icon) return;
       if (el.style.display === 'none') {
         el.style.display = 'block';
         icon.classList.replace('fa-chevron-down', 'fa-chevron-up');
@@ -220,317 +598,361 @@
       }
     }
 
-    // ========================================================
-    // AMBIL DATA DARI SUPABASE
-    // ========================================================
-    async function fetchData() {
-      const start = document.getElementById('startDate').value;
-      const end = document.getElementById('endDate').value;
+    // ============================================================
+    // AMBIL DATA DARI VIEW
+    // ============================================================
+    async function fetchAllData(startDate, endDate) {
+      // 1. Daily summary
+      let query = supabase.from('daily_summary').select('*').order('tanggal', { ascending: true });
+      if (startDate) query = query.gte('tanggal', startDate);
+      if (endDate) query = query.lte('tanggal', endDate);
+      const { data: daily, error: e1 } = await query;
 
-      let query = supabase
-        .from('transactions')
+      // 2. Reseller summary
+      const { data: resellers, error: e2 } = await supabase.from('reseller_summary').select('*');
+
+      // 3. Gateway summary
+      const { data: gateways, error: e3 } = await supabase.from('gateway_summary').select('*');
+
+      // 4. Product summary
+      const { data: products, error: e4 } = await supabase.from('product_summary').select('*');
+
+      // 5. Hourly stats
+      const { data: hourly, error: e5 } = await supabase.from('hourly_stats').select('*').order('jam', { ascending: true });
+
+      // 6. Day of week
+      const { data: dayWeek, error: e6 } = await supabase.from('day_of_week_summary').select('*');
+
+      // 7. Status distribution
+      const { data: statusDist, error: e7 } = await supabase.from('status_distribution').select('*');
+
+      // 8. Topup summary (ambil 30 hari terakhir)
+      let topupQuery = supabase.from('topup_summary').select('*').order('tanggal', { ascending: true });
+      if (startDate) topupQuery = topupQuery.gte('tanggal', startDate);
+      if (endDate) topupQuery = topupQuery.lte('tanggal', endDate);
+      const { data: topups, error: e8 } = await topupQuery;
+
+      // 9. Reseller daily (untuk multi trend) - ambil top 5 reseller dulu
+      const topResellers = resellers ? resellers.sort((a, b) => b.omzet - a.omzet).slice(0, 5).map(r => r.reseller) : [];
+      let dailyQuery = supabase.from('reseller_daily_summary').select('*').order('tanggal', { ascending: true });
+      if (topResellers.length > 0) dailyQuery = dailyQuery.in('reseller', topResellers);
+      if (startDate) dailyQuery = dailyQuery.gte('tanggal', startDate);
+      if (endDate) dailyQuery = dailyQuery.lte('tanggal', endDate);
+      const { data: resellerDaily, error: e9 } = await dailyQuery;
+
+      // 10. Reseller weekly (untuk velocity)
+      const { data: weekly, error: e10 } = await supabase
+        .from('reseller_weekly_summary')
         .select('*')
-        .order('tgl_entri', { ascending: true });
+        .gte('minggu', new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0])
+        .order('minggu', { ascending: false });
 
-      if (start) query = query.gte('tgl_entri', start);
-      if (end) query = query.lte('tgl_entri', end);
-
-      // Batasi jumlah data untuk performa (ambil 10.000 terakhir)
-      // Anda bisa hapus limit jika sudah punya view agregasi
-      query = query.limit(10000);
-
-      const { data, error } = await query;
-      if (error) {
-        console.error('Error fetching data:', error);
-        alert('Gagal mengambil data dari Supabase: ' + error.message);
-        return [];
+      if (e1 || e2 || e3 || e4 || e5 || e6 || e7 || e8 || e9 || e10) {
+        console.error('Error fetching views:', { e1, e2, e3, e4, e5, e6, e7, e8, e9, e10 });
+        return null;
       }
-      return data;
+
+      return { daily, resellers, gateways, products, hourly, dayWeek, statusDist, topups, resellerDaily, weekly };
     }
 
-    // ========================================================
+    // ============================================================
     // ENGINE UTAMA
-    // ========================================================
+    // ============================================================
     async function runEngine() {
       const loadingEl = document.getElementById('loading');
       const contentEl = document.getElementById('dashboardContent');
       loadingEl.style.display = 'flex';
       contentEl.style.display = 'none';
 
-      // Ambil data
-      const raw = await fetchData();
-      if (!raw || raw.length === 0) {
-        loadingEl.innerHTML = '<i class="fa-solid fa-circle-exclamation fa-2x"></i> <span>Tidak ada data dalam rentang tanggal ini.</span>';
+      const start = document.getElementById('startDate').value;
+      const end = document.getElementById('endDate').value;
+
+      const data = await fetchAllData(start, end);
+      if (!data) {
+        loadingEl.innerHTML = '<i class="fa-solid fa-circle-exclamation fa-2x"></i> <span>Gagal mengambil data. Cek console.</span>';
         return;
       }
-
-      // Simpan data global
-      allData = raw;
 
       // Update dropdown reseller
       const sel = document.getElementById('resellerFilter');
       const currentVal = sel.value;
       sel.innerHTML = '<option value="">Semua Reseller</option>';
-      const resellers = [...new Set(raw.map(d => d.reseller).filter(Boolean))].sort();
-      resellers.forEach(r => {
-        const opt = document.createElement('option');
-        opt.value = r;
-        opt.textContent = r;
-        sel.appendChild(opt);
-      });
-      sel.value = currentVal; // pertahankan pilihan jika ada
+      if (data.resellers) {
+        const sorted = data.resellers.sort((a, b) => b.total_trx - a.total_trx);
+        sorted.forEach(r => {
+          const opt = document.createElement('option');
+          opt.value = r.reseller;
+          opt.textContent = r.reseller + ' (' + r.total_trx + ' trx)';
+          sel.appendChild(opt);
+        });
+      }
+      if (currentVal) sel.value = currentVal;
 
-      // Proses dan tampilkan
-      processData(raw);
+      // Render dashboard
+      renderDashboard(data, start, end);
 
       loadingEl.style.display = 'none';
       contentEl.style.display = 'block';
     }
 
-    // ========================================================
-    // PROSES DATA & RENDER
-    // ========================================================
-    function processData(data) {
-      const rFilter = document.getElementById('resellerFilter').value;
-      const today = new Date();
-      const todayUnix = today.getTime();
-      const p1Start = todayUnix - 7 * 86400000;
-      const p2Start = todayUnix - 14 * 86400000;
+    // ============================================================
+    // RENDER DASHBOARD
+    // ============================================================
+    function renderDashboard(data, start, end) {
+      const { daily, resellers, gateways, products, hourly, dayWeek, statusDist, topups, resellerDaily, weekly } = data;
 
-      // Filter berdasarkan reseller (jika ada)
-      let filtered = data;
-      if (rFilter) filtered = data.filter(d => d.reseller === rFilter);
+      // ===== KPI =====
+      let totalOmzet = 0, totalLaba = 0, totalTrx = 0, totalSukses = 0;
+      if (daily) {
+        daily.forEach(d => {
+          totalTrx += d.total_trx;
+          totalOmzet += d.omzet || 0;
+          totalLaba += d.laba || 0;
+          totalSukses += d.sukses || 0;
+        });
+      }
+      document.getElementById('kpiOmzetTotal').innerText = rp(totalOmzet);
+      document.getElementById('kpiLabaTotal').innerText = rp(totalLaba);
+      document.getElementById('kpiTrxTotal').innerText = totalTrx.toLocaleString('id-ID');
+      const successRate = totalTrx > 0 ? ((totalSukses / totalTrx) * 100).toFixed(1) : 0;
+      document.getElementById('kpiSuccessRate').innerText = successRate + '%';
+      document.getElementById('kpiActiveReseller').innerText = resellers ? resellers.filter(r => r.total_trx > 0).length : 0;
 
-      // Inisialisasi agregator
-      let mOmzetAll = 0, mLabaAll = 0, totalGlobalTrx = filtered.length;
-      let tTrend = {}, trendMulti = {}, statusMap = {};
-      let jamTotal = Array(24).fill(0), jamError = Array(24).fill(0);
-      let gatewayMap = {}, dayWeekMap = Array(7).fill(0), prodMap = {};
-      let dailySaldo = {}, resMap = {}, momentumMap = {};
-
-      filtered.forEach(r => {
-        // status
-        const isSukses = r.status && r.status.toLowerCase().includes('sukses');
-        if (isSukses) {
-          mOmzetAll += Number(r.hrg_jual) || 0;
-          mLabaAll += Number(r.laba) || 0;
-        }
-
-        // status kategori
-        let cat = 'Lainnya';
-        if (isSukses) cat = 'Sukses';
-        else if (r.status && r.status.includes('timeout')) cat = 'Timeout';
-        else if (r.status && r.status.includes('gagal')) cat = 'Gagal';
-        else if (r.status && r.status.includes('kosong')) cat = 'Stok Kosong';
-        else if (r.status && r.status.includes('batal')) cat = 'Dibatalkan';
-        else if (r.status && r.status.includes('suspect')) cat = 'Suspect';
-        statusMap[cat] = (statusMap[cat] || 0) + 1;
-
-        // jam
-        const dateObj = new Date(r.tgl_entri);
-        const hour = dateObj.getHours();
-        if (!isNaN(hour)) {
-          jamTotal[hour]++;
-          if (!isSukses) jamError[hour]++;
-        }
-
-        // saldo (untuk top-up)
-        const saldo = Number(r.saldo_akhir) || 0;
-        if (saldo > 0) {
-          const tglStr = r.tgl_entri;
-          const modul = r.modul || 'Lainnya';
-          if (!dailySaldo[modul]) dailySaldo[modul] = {};
-          if (!dailySaldo[modul][tglStr]) dailySaldo[modul][tglStr] = [];
-          dailySaldo[modul][tglStr].push(saldo);
-        }
-
-        // reseller stats
-        const reseller = r.reseller || 'Lainnya';
-        if (!resMap[reseller]) resMap[reseller] = { trx: 0, laba: 0, sukses: 0, lastTgl: 0, activeDays: new Set() };
-        const rs = resMap[reseller];
-        rs.trx++;
-        const unix = new Date(r.tgl_entri).getTime();
-        if (unix > rs.lastTgl) rs.lastTgl = unix;
-        if (isSukses) {
-          rs.laba += Number(r.laba) || 0;
-          rs.sukses++;
-          rs.activeDays.add(r.tgl_entri);
-        }
-
-        // gateway
-        const modul = r.modul || 'Modul Lainnya';
-        if (!gatewayMap[modul]) gatewayMap[modul] = { trx: 0, sukses: 0, gagal: 0, timeout: 0, durSum: 0, durCnt: 0 };
-        const gm = gatewayMap[modul];
-        gm.trx++;
-        if (isSukses) {
-          gm.sukses++;
-          // latency (tgl_status - tgl_entri) dalam detik
-          if (r.tgl_status && r.tgl_entri) {
-            const tStatus = new Date(r.tgl_status).getTime();
-            const tEntri = new Date(r.tgl_entri).getTime();
-            if (!isNaN(tStatus) && !isNaN(tEntri) && tStatus > tEntri) {
-              const dur = (tStatus - tEntri) / 1000;
-              gm.durSum += dur;
-              gm.durCnt++;
-            }
-          }
-        } else if (r.status && r.status.includes('gagal')) {
-          gm.gagal++;
-        } else if (r.status && (r.status.includes('timeout') || r.status.includes('suspect'))) {
-          gm.timeout++;
-        }
-
-        // trend harian (hanya sukses)
-        if (isSukses) {
-          const tglStr = r.tgl_entri;
-          const hargaJual = Number(r.hrg_jual) || 0;
-          tTrend[tglStr] = (tTrend[tglStr] || 0) + hargaJual;
-          const day = new Date(tglStr).getDay();
-          if (!isNaN(day)) dayWeekMap[day] += hargaJual;
-
-          // multi reseller trend
-          if (!trendMulti[reseller]) trendMulti[reseller] = {};
-          trendMulti[reseller][tglStr] = (trendMulti[reseller][tglStr] || 0) + hargaJual;
-
-          // produk
-          const produk = r.produk || 'Lainnya';
-          if (!prodMap[produk]) prodMap[produk] = { vol: 0, hBeli: 0, laba: 0 };
-          const pm = prodMap[produk];
-          pm.vol++;
-          pm.hBeli += Number(r.hrg_beli) || 0;
-          pm.laba += Number(r.laba) || 0;
-        }
-
-        // momentum (untuk velocity)
-        if (!momentumMap[reseller]) momentumMap[reseller] = { p1: 0, p2: 0, prodMix: {} };
-        const mm = momentumMap[reseller];
-        if (unix >= p1Start && unix <= todayUnix) mm.p1++;
-        else if (unix >= p2Start && unix < p1Start) mm.p2++;
-        const prod = r.produk || 'Lainnya';
-        mm.prodMix[prod] = (mm.prodMix[prod] || 0) + 1;
-      });
-
-      // ===== UPDATE KPI =====
-      document.getElementById('kpiOmzetTotal').innerText = rp(mOmzetAll);
-      document.getElementById('kpiLabaTotal').innerText = rp(mLabaAll);
-      document.getElementById('kpiTrxComp').innerText = `${totalGlobalTrx.toLocaleString('id-ID')}`;
-
-      // ===== GRAFIK =====
-      const tKeys = Object.keys(tTrend).sort();
-      // Trend global
+      // ===== TREND GLOBAL =====
+      const tKeys = daily ? daily.map(d => d.tanggal) : [];
+      const tValues = daily ? daily.map(d => d.omzet || 0) : [];
       drawChart('c-trendTotal', 'line', tKeys, [{
         label: 'Omzet',
-        data: tKeys.map(k => tTrend[k]),
-        borderColor: '#8B5CF6',
-        backgroundColor: 'rgba(139,92,246,0.1)',
+        data: tValues,
+        borderColor: '#6366F1',
+        backgroundColor: 'rgba(99, 102, 241, 0.08)',
         fill: true,
-        tension: 0.3
+        tension: 0.4,
+        pointRadius: 1,
+        pointBackgroundColor: '#6366F1'
       }]);
 
-      // Trend multi reseller (max 10 reseller teratas)
-      renderTrendMultiChart(tKeys, trendMulti);
+      // ===== TREND MULTI RESELLER =====
+      renderMultiTrend(resellerDaily);
 
-      // Status doughnut
-      const sColor = { 'Sukses': '#10B981', 'Timeout': '#F59E0B', 'Gagal': '#EF4444', 'Stok Kosong': '#64748B', 'Dibatalkan': '#991B1B', 'Suspect': '#D946EF' };
-      const statusLabels = Object.keys(statusMap);
+      // ===== STATUS DISTRIBUTION =====
+      const sColor = { 'Sukses': '#10B981', 'Gagal': '#EF4444', 'Timeout': '#F59E0B', 'Stok Kosong': '#64748B', 'Dibatalkan': '#991B1B', 'Suspect': '#D946EF', 'Lainnya': '#94A3B8' };
+      const statusLabels = statusDist ? statusDist.map(d => d.status_category) : [];
+      const statusValues = statusDist ? statusDist.map(d => d.total) : [];
       drawChart('c-status', 'doughnut', statusLabels, [{
-        data: Object.values(statusMap),
+        data: statusValues,
         backgroundColor: statusLabels.map(l => sColor[l] || '#94A3B8'),
         borderWidth: 2,
         borderColor: '#fff'
       }]);
 
-      // Dual axis (jam)
+      // ===== DUAL AXIS =====
+      const jamLabels = hourly ? hourly.map(h => String(h.jam).padStart(2, '0') + ':00') : [];
+      const jamTotal = hourly ? hourly.map(h => h.total_trx) : [];
+      const jamError = hourly ? hourly.map(h => h.error_trx) : [];
       const errRates = jamTotal.map((t, i) => t > 0 ? (jamError[i] / t) * 100 : 0);
-      drawChartDual('c-dualAxis', Array.from({ length: 24 }, (_, i) => i + ':00'), jamTotal, errRates);
+      drawChartDual('c-dualAxis', jamLabels, jamTotal, errRates);
 
-      // Tabel gateway
-      const gatewayKeys = Object.keys(gatewayMap).sort((a, b) => gatewayMap[b].trx - gatewayMap[a].trx);
-      let htmlGateway = '';
-      gatewayKeys.forEach(k => {
-        const g = gatewayMap[k];
-        const sr = g.trx > 0 ? (g.sukses / g.trx) * 100 : 0;
-        const lat = g.durCnt > 0 ? (g.durSum / g.durCnt).toFixed(1) : '-';
-        const eff = (sr > 85 && g.durCnt > 0 && (g.durSum / g.durCnt) < 10) ? '<span class="badge bg-g">Optimal</span>' : '<span class="badge bg-r">Warning</span>';
-        htmlGateway += `<tr><td><b>${k}</b></td><td>${g.trx}</td><td><span style="color:var(--success); font-weight:700;">${g.sukses}</span></td><td><span style="color:var(--danger);">${g.gagal}</span></td><td><span style="color:var(--warning);">${g.timeout}</span></td><td><span class="badge ${sr>80?'bg-g':'bg-r'}">${sr.toFixed(1)}%</span></td><td>${lat}</td><td>${eff}</td></tr>`;
+      // ===== GATEWAY TABLE =====
+      const gwHtml = gateways ? gateways.sort((a, b) => b.total_trx - a.total_trx).map(g => {
+        const sr = g.total_trx > 0 ? ((g.sukses / g.total_trx) * 100) : 0;
+        const lat = g.avg_latency_sec ? g.avg_latency_sec.toFixed(1) : '-';
+        const status = (sr > 85 && (g.avg_latency_sec || 0) < 10) ? '<span class="badge bg-g">Optimal</span>' : '<span class="badge bg-r">Warning</span>';
+        return `<tr>
+          <td><b>${g.modul}</b></td>
+          <td>${g.total_trx}</td>
+          <td><span style="color:var(--success);font-weight:700;">${g.sukses}</span></td>
+          <td><span style="color:var(--danger);">${g.gagal}</span></td>
+          <td><span style="color:var(--warning);">${g.timeout}</span></td>
+          <td><span class="badge ${sr>80?'bg-g':'bg-r'}">${sr.toFixed(1)}%</span></td>
+          <td>${lat}</td>
+          <td>${status}</td>
+        </tr>`;
+      }).join('') : '';
+      document.getElementById('tbl-gateway').innerHTML = gwHtml || '<tr><td colspan="8" style="text-align:center;color:gray;">Tidak ada data</td></tr>';
+
+      // ===== DAY OF WEEK =====
+      const dayArr = new Array(7).fill(0);
+      if (dayWeek) {
+        dayWeek.forEach(d => {
+          const idx = Math.round(d.day_index);
+          if (idx >= 0 && idx < 7) dayArr[idx] = d.omzet || 0;
+        });
+      }
+      drawChart('c-dayWeek', 'bar', daysName, [{
+        label: 'Omzet',
+        data: dayArr,
+        backgroundColor: ['#6366F1', '#8B5CF6', '#D946EF', '#EC4899', '#F43F5E', '#FB7185', '#F97316'],
+        borderRadius: 8
+      }]);
+
+      // ===== TOP-UP =====
+      let topHtml = '';
+      const aggTopup = {};
+      if (topups) {
+        topups.forEach(t => {
+          const key = t.tanggal;
+          if (!aggTopup[key]) aggTopup[key] = {};
+          if (!aggTopup[key][t.modul]) aggTopup[key][t.modul] = [];
+          aggTopup[key][t.modul].push(t.avg_saldo);
+        });
+        // Bandingkan hari sebelumnya
+        const dates = Object.keys(aggTopup).sort();
+        for (let i = 1; i < dates.length; i++) {
+          const prev = dates[i - 1];
+          const curr = dates[i];
+          const prevModules = aggTopup[prev] || {};
+          const currModules = aggTopup[curr] || {};
+          Object.keys(currModules).forEach(mod => {
+            const avgPrev = prevModules[mod] ? prevModules[mod].reduce((a, b) => a + b, 0) / prevModules[mod].length : 0;
+            const avgCurr = currModules[mod].reduce((a, b) => a + b, 0) / currModules[mod].length;
+            if (avgCurr > avgPrev) {
+              const diff = avgCurr - avgPrev;
+              topHtml += `<div class="alert a-info"><i class="fa-solid fa-arrow-up-right-dots"></i> <b>${curr}</b> <span class="badge bg-violet">${mod}</span> +${rp(diff)}</div>`;
+            }
+          });
+        }
+      }
+      document.getElementById('topupBox').innerHTML = topHtml || '<div style="color:gray;text-align:center;padding:20px;">Tidak ada penambahan saldo</div>';
+
+      // ===== TOP-UP TREND CHART =====
+      const topDates = Object.keys(aggTopup).sort();
+      const topValues = topDates.map(d => {
+        let total = 0;
+        const modules = aggTopup[d] || {};
+        Object.keys(modules).forEach(mod => {
+          const vals = modules[mod];
+          const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
+          total += avg;
+        });
+        return total;
       });
-      document.getElementById('tbl-gateway').innerHTML = htmlGateway || '<tr><td colspan="8" style="text-align:center; color:gray;">Tidak ada data modul.</td></tr>';
+      drawChart('c-topupTrend', 'bar', topDates, [{
+        label: 'Rata-rata Saldo',
+        data: topValues,
+        backgroundColor: '#06B6D4',
+        borderRadius: 6
+      }]);
 
-      // Pola hari
-      drawChart('c-dayWeek', 'bar', getDaysArr(), [{ label: 'Omzet', data: dayWeekMap, backgroundColor: '#06B6D4', borderRadius: 6 }]);
-
-      // Zombie products
-      const prodKeys = Object.keys(prodMap);
+      // ===== ZOMBIE PRODUCTS =====
       let zombieHtml = '';
-      prodKeys.forEach(p => {
-        const pd = prodMap[p];
-        const roi = pd.hBeli > 0 ? (pd.laba / pd.hBeli) * 100 : 0;
-        if (pd.vol > 3 && roi < 0.5) {
-          zombieHtml += `<tr><td><b>${p}</b></td><td>${pd.vol}</td><td>${rp(pd.hBeli/pd.vol)}</td><td><span class="badge bg-r">${roi.toFixed(2)}%</span></td></tr>`;
-        }
-      });
-      document.getElementById('tbl-zombie').innerHTML = zombieHtml || '<tr><td colspan="4" style="color:gray; text-align:center; padding:15px;">Seluruh margin produk sehat.</td></tr>';
-
-      // Top-up
-      let tHtml = '';
-      const aggTopupDaily = {};
-      Object.keys(dailySaldo).sort().forEach(modulName => {
-        const sdKeys = Object.keys(dailySaldo[modulName]).sort();
-        for (let i = 1; i < sdKeys.length; i++) {
-          const prevDate = sdKeys[i - 1];
-          const currDate = sdKeys[i];
-          const arrP = dailySaldo[modulName][prevDate];
-          const arrC = dailySaldo[modulName][currDate];
-          const avgP = arrP.reduce((a, b) => a + b, 0) / arrP.length;
-          const avgC = arrC.reduce((a, b) => a + b, 0) / arrC.length;
-          if (avgC > avgP) {
-            const nominal = avgC - avgP;
-            aggTopupDaily[currDate] = (aggTopupDaily[currDate] || 0) + nominal;
-            tHtml += `<div class="alert a-info" style="border:none; padding:10px 14px;"><i class="fa-solid fa-arrow-up-right-dots"></i> <b style="min-width:75px;">${currDate}</b> <span class="badge bg-violet" style="margin: 0 8px;">${modulName}</span> +${rp(nominal)}</div>`;
+      if (products) {
+        products.forEach(p => {
+          const roi = p.total_hbeli > 0 ? ((p.total_laba / p.total_hbeli) * 100) : 0;
+          if (p.total_trx > 3 && roi < 0.5) {
+            zombieHtml += `<tr>
+              <td><b>${p.produk}</b></td>
+              <td>${p.total_trx}</td>
+              <td>${rp(p.avg_beli || 0)}</td>
+              <td><span class="badge bg-r">${roi.toFixed(2)}%</span></td>
+            </tr>`;
           }
-        }
-      });
-      document.getElementById('topupBox').innerHTML = tHtml || '<div style="font-size:11px; color:gray; text-align:center; padding:15px;">Tidak ada penambahan saldo terdeteksi.</div>';
+        });
+      }
+      document.getElementById('tbl-zombie').innerHTML = zombieHtml || '<tr><td colspan="4" style="color:gray;text-align:center;">Semua margin produk sehat</td></tr>';
 
-      const topupDates = Object.keys(aggTopupDaily).sort();
-      const topupValues = topupDates.map(d => aggTopupDaily[d]);
-      drawChart('c-topupTrend', 'bar', topupDates, [{ label: 'Total Top-Up', data: topupValues, backgroundColor: '#06B6D4', borderRadius: 4 }]);
+      // ===== VELOCITY TRACKER =====
+      let velHtml = '';
+      if (weekly) {
+        const resellerMap = {};
+        weekly.forEach(w => {
+          if (!resellerMap[w.reseller]) resellerMap[w.reseller] = [];
+          resellerMap[w.reseller].push(w);
+        });
+        // Ambil 2 minggu terakhir
+        const now = new Date();
+        const week1Start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
+        const week2Start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 14);
+        Object.keys(resellerMap).forEach(name => {
+          const weeks = resellerMap[name].sort((a, b) => a.minggu.localeCompare(b.minggu));
+          const last2 = weeks.slice(-2);
+          if (last2.length === 2) {
+            const w1 = last2[1]; // minggu ini
+            const w2 = last2[0]; // minggu lalu
+            const growth = w2.trx_minggu > 0 ? ((w1.trx_minggu - w2.trx_minggu) / w2.trx_minggu) * 100 : 100;
+            let badge = '';
+            if (w2.trx_minggu === 0) badge = '<span class="badge bg-g">New</span>';
+            else if (growth < -20) badge = `<span class="badge bg-r">Drop ${growth.toFixed(0)}%</span>`;
+            else if (growth > 20) badge = `<span class="badge bg-g">Naik +${growth.toFixed(0)}%</span>`;
+            else badge = '<span class="badge bg-violet">Stabil</span>';
+            // spesialisasi (produk terbanyak) - ambil dari reseller summary
+            const rs = resellers ? resellers.find(r => r.reseller === name) : null;
+            const spec = rs ? rs.produk_terbanyak : '-';
+            velHtml += `<tr><td><b>${name}</b></td><td>${w1.trx_minggu}</td><td>${w2.trx_minggu}</td><td>${badge}</td><td>${spec}</td></tr>`;
+          }
+        });
+      }
+      document.getElementById('tbl-velocity').innerHTML = velHtml || '<tr><td colspan="5" style="color:gray;text-align:center;">Belum cukup data</td></tr>';
 
-      // Velocity
-      const velKeys = Object.keys(momentumMap).sort((a, b) => momentumMap[b].p1 - momentumMap[a].p1);
-      let vHtml = '';
-      velKeys.forEach(k => {
-        const m = momentumMap[k];
-        if (m.p1 === 0 && m.p2 === 0) return;
-        const growth = m.p2 > 0 ? ((m.p1 - m.p2) / m.p2) * 100 : 100;
-        let badge = '';
-        if (m.p2 === 0) badge = '<span class="badge bg-g">New</span>';
-        else if (growth < -20) badge = `<span class="badge bg-r">Drop ${growth.toFixed(0)}%</span>`;
-        else if (growth > 20) badge = `<span class="badge bg-g">Naik +${growth.toFixed(0)}%</span>`;
-        else badge = '<span class="badge bg-violet">Stabil</span>';
-        const mixKeys = Object.keys(m.prodMix);
-        const mix = mixKeys.length > 0 ? mixKeys.reduce((a, b) => m.prodMix[a] > m.prodMix[b] ? a : b) : '-';
-        vHtml += `<tr><td><b>${k}</b></td><td>${m.p1}</td><td>${m.p2}</td><td>${badge}</td><td>${mix}</td></tr>`;
-      });
-      document.getElementById('tbl-velocity').innerHTML = vHtml.slice(0, 1500) || '<tr><td colspan="5" style="text-align:center; color:gray;">Belum cukup data transaksi.</td></tr>';
-
-      // RFM
-      const rfmKeys = Object.keys(resMap).sort((a, b) => resMap[b].trx - resMap[a].trx);
+      // ===== RFM TABLE =====
       let rfmHtml = '';
-      rfmKeys.forEach(k => {
-        const r = resMap[k];
-        const daysAgo = Math.floor((todayUnix - r.lastTgl) / 86400000);
-        const tier = (r.trx > 30 && daysAgo <= 3) ? '<span class="badge bg-y">VIP Member</span>' : (daysAgo > 14 ? '<span class="badge bg-r">Sleeping</span>' : '<span class="badge bg-violet">Regular</span>');
-        const actDays = r.activeDays.size > 0 ? r.activeDays.size : 1;
-        const avgDaily = (r.trx / actDays).toFixed(1);
-        rfmHtml += `<tr><td><b>${k}</b></td><td>${tier}</td><td>${r.trx}</td><td>${rp(r.laba)}</td><td>${avgDaily} / hari</td><td>${daysAgo===0?'Hari ini':daysAgo+' hr lalu'}</td></tr>`;
-      });
-      document.getElementById('tbl-rfm').innerHTML = rfmHtml.slice(0, 1500) || '<tr><td colspan="6" style="text-align:center; color:gray;">Data kosong.</td></tr>';
+      if (resellers) {
+        const now = new Date();
+        resellers.sort((a, b) => b.total_trx - a.total_trx).forEach(r => {
+          const daysAgo = r.last_trx ? Math.floor((now - new Date(r.last_trx)) / 86400000) : 999;
+          let tier = '<span class="badge bg-violet">Regular</span>';
+          if (r.total_trx > 50 && daysAgo <= 3) tier = '<span class="badge bg-y">VIP</span>';
+          else if (daysAgo > 14) tier = '<span class="badge bg-r">Sleeping</span>';
+          const avgDaily = r.active_days > 0 ? (r.total_trx / r.active_days).toFixed(1) : '0';
+          rfmHtml += `<tr>
+            <td><b>${r.reseller}</b></td>
+            <td>${tier}</td>
+            <td>${r.total_trx}</td>
+            <td>${rp(r.laba)}</td>
+            <td>${avgDaily}</td>
+            <td>${daysAgo > 30 ? '>30 hr' : daysAgo + ' hr'}</td>
+          </tr>`;
+        });
+      }
+      document.getElementById('tbl-rfm').innerHTML = rfmHtml || '<tr><td colspan="6" style="color:gray;text-align:center;">Tidak ada data</td></tr>';
     }
 
-    // ========================================================
-    // FUNGSI GRAFIK
-    // ========================================================
+    // ============================================================
+    // FUNGSI MULTI TREND (TOP 5 RESELLER)
+    // ============================================================
+    function renderMultiTrend(resellerDaily) {
+      const id = 'c-trendMulti';
+      const canvas = document.getElementById(id);
+      if (!canvas) return;
+      if (charts[id]) charts[id].destroy();
+
+      if (!resellerDaily || resellerDaily.length === 0) return;
+
+      const grouped = {};
+      resellerDaily.forEach(d => {
+        if (!grouped[d.reseller]) grouped[d.reseller] = {};
+        grouped[d.reseller][d.tanggal] = d.omzet || 0;
+      });
+
+      const allDates = [...new Set(resellerDaily.map(d => d.tanggal))].sort();
+      const palette = ['#6366F1', '#D946EF', '#06B6D4', '#F59E0B', '#10B981'];
+      const datasets = Object.keys(grouped).slice(0, 5).map((name, idx) => ({
+        label: name,
+        data: allDates.map(d => grouped[name][d] || 0),
+        borderColor: palette[idx % palette.length],
+        backgroundColor: 'transparent',
+        tension: 0.3,
+        borderWidth: 2.5,
+        pointRadius: 1
+      }));
+
+      try {
+        charts[id] = new Chart(canvas, {
+          type: 'line',
+          data: { labels: allDates, datasets },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10, weight: '600' } } } },
+            scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: '#F1F5F9' } } }
+          }
+        });
+      } catch (e) { console.warn('Multi trend error:', e); }
+    }
+
+    // ============================================================
+    // FUNGSI CHART
+    // ============================================================
     function drawChart(id, type, labels, datasets) {
       const canvas = document.getElementById(id);
       if (!canvas) return;
@@ -544,7 +966,7 @@
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-              legend: { display: (type === 'doughnut'), position: 'right', labels: { boxWidth: 12, usePointStyle: true } }
+              legend: { display: (type === 'doughnut'), position: 'right', labels: { boxWidth: 12, usePointStyle: true, font: { size: 11, weight: '600' } } }
             },
             scales: (type === 'doughnut' ? undefined : { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: '#F1F5F9' } } })
           }
@@ -563,8 +985,8 @@
           data: {
             labels,
             datasets: [
-              { label: 'Volume Trx', data: data1, backgroundColor: '#EDE9FE', borderRadius: 4, yAxisID: 'y' },
-              { label: 'Error Rate %', data: data2, type: 'line', borderColor: '#EF4444', tension: 0.3, yAxisID: 'y1' }
+              { label: 'Volume Trx', data: data1, backgroundColor: 'rgba(99,102,241,0.2)', borderRadius: 4, yAxisID: 'y' },
+              { label: 'Error Rate %', data: data2, type: 'line', borderColor: '#EF4444', tension: 0.3, pointRadius: 2, yAxisID: 'y1' }
             ]
           },
           options: {
@@ -581,52 +1003,13 @@
       } catch (e) { console.warn('Dual chart error:', id, e); }
     }
 
-    function renderTrendMultiChart(labels, resellerTrendData) {
-      const id = 'c-trendMulti';
-      const canvas = document.getElementById(id);
-      if (!canvas) return;
-      if (charts[id]) charts[id].destroy();
-      if (!labels || labels.length === 0) return;
-
-      // Ambil top 5 reseller berdasarkan total omzet
-      const sorted = Object.keys(resellerTrendData).sort((a, b) => {
-        const sumA = Object.values(resellerTrendData[a]).reduce((s, v) => s + v, 0);
-        const sumB = Object.values(resellerTrendData[b]).reduce((s, v) => s + v, 0);
-        return sumB - sumA;
-      }).slice(0, 5);
-
-      const palette = ['#8B5CF6', '#D946EF', '#06B6D4', '#F59E0B', '#10B981'];
-      const datasets = sorted.map((name, idx) => ({
-        label: name,
-        data: labels.map(d => resellerTrendData[name][d] || 0),
-        borderColor: palette[idx % palette.length],
-        backgroundColor: 'transparent',
-        tension: 0.3,
-        borderWidth: 2,
-        pointRadius: 1,
-        fill: false
-      }));
-
-      try {
-        charts[id] = new Chart(canvas, {
-          type: 'line',
-          data: { labels, datasets },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { position: 'bottom', labels: { boxWidth: 8, font: { size: 10 } } } },
-            scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: '#F1F5F9' } } }
-          }
-        });
-      } catch (e) { console.warn('Trend multi error:', e); }
-    }
-
-    // ========================================================
+    // ============================================================
     // INISIALISASI
-    // ========================================================
+    // ============================================================
     function init() {
       const today = new Date();
-      document.getElementById('startDate').value = toDateInput(new Date(today.getFullYear(), today.getMonth(), 1));
+      const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+      document.getElementById('startDate').value = toDateInput(firstDay);
       document.getElementById('endDate').value = toDateInput(today);
       runEngine();
     }
