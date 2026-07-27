@@ -11,7 +11,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    /* ===== STYLE (sama seperti sebelumnya) ===== */
+    /* ===== STYLE ===== */
     * { margin:0; padding:0; box-sizing:border-box; }
     :root {
       --primary: #7c3aed;
@@ -75,7 +75,7 @@
     #loading { text-align:center; padding:15vh 20px; font-size:16px; font-weight:700; color:var(--primary); display:flex; flex-direction:column; align-items:center; gap:14px; }
     .spinner { width:48px; height:48px; border:4px solid rgba(124,58,237,0.15); border-top-color:var(--primary); border-radius:50%; animation:spin 0.8s linear infinite; }
     @keyframes spin { to{ transform:rotate(360deg); } }
-    .notice { background:#fef3c7; color:#92400e; padding:12px 16px; border-radius:12px; margin-bottom:16px; font-weight:600; font-size:13px; border:1px solid #fcd34d; }
+    .notice { background:#fef3c7; color:#92400e; padding:12px 16px; border-radius:12px; margin-bottom:16px; font-weight:600; font-size:13px; border:1px solid #fcd34d; max-width:600px; margin-left:auto; margin-right:auto; }
     @media (max-width:768px) { .header{padding:14px 16px;} .brand{font-size:15px;} .brand-icon{width:34px;height:34px;font-size:16px;} .container{padding:12px 16px;} .filter-bar{flex-direction:column;gap:10px;padding:14px;} .field{min-width:100%;} .kpi-grid{grid-template-columns:1fr 1fr;gap:10px;} .kpi-card{flex-direction:column;text-align:center;padding:14px 10px;gap:6px;} .kpi-val{font-size:17px;} .grid-2{grid-template-columns:1fr;gap:12px;} .chart-container{height:180px;} .section-header{padding:12px 14px;} }
   </style>
 </head>
@@ -159,8 +159,8 @@
     // ==========================================================
     // KONFIGURASI SUPABASE (GANTI DENGAN MILIK ANDA)
     // ==========================================================
-    const SUPABASE_URL = 'https://YOUR_PROJECT_REF.supabase.co';      // Ganti!
-    const SUPABASE_ANON_KEY = 'sb_publishable_kwTA1M0rLb4sy-wuRWFGlQ_sbawszSM'; // Ganti!
+    const SUPABASE_URL = 'https://smzvlyhfqgvocqckudss.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_kwTA1M0rLb4sy-wuRWFGlQ_sbawszSM'; // Ganti jika perlu
 
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -187,7 +187,6 @@
     // FETCH DATA: Coba materialized, jika kosong fallback ke view
     // ==========================================================
     async function fetchDataWithFallback(start, end) {
-      // Tentukan nama tabel yang akan dicoba
       const tables = {
         daily: ['daily_summary_materialized', 'daily_summary'],
         resellers: ['reseller_summary_materialized', 'reseller_summary'],
@@ -203,7 +202,6 @@
       const result = {};
       let usingMat = true;
 
-      // Fungsi untuk mencoba satu query
       async function tryFetch(tableName, queryBuilder) {
         try {
           const { data, error } = await queryBuilder(tableName);
@@ -254,21 +252,11 @@
         const viewResults = await Promise.all(Object.values(viewPromises));
         const viewKeys = Object.keys(viewPromises);
         viewKeys.forEach((key, idx) => {
-          result[key] = viewResults[idx] || [];
+          // Jika hasil materialized kosong, timpa dengan view
+          if (result[key].length === 0) {
+            result[key] = viewResults[idx] || [];
+          }
         });
-      }
-
-      // Tampilkan peringatan jika pakai view biasa
-      if (!usingMat) {
-        document.getElementById('loading').innerHTML = `
-          <div class="notice">
-            <i class="fa-solid fa-triangle-exclamation"></i> 
-            Menggunakan view biasa (agregasi real-time) – performa lebih lambat. 
-            Untuk kecepatan, jalankan <code>SELECT refresh_all_summaries();</code> di SQL Editor Supabase.
-          </div>
-          <div class="spinner"></div>
-          <span>Memuat data...</span>
-        `;
       }
 
       return result;
@@ -323,7 +311,7 @@
     }
 
     // ==========================================================
-    // RENDER DASHBOARD (sama seperti sebelumnya)
+    // RENDER DASHBOARD
     // ==========================================================
     function renderDashboard(data) {
       let totalOmzet = 0, totalLaba = 0, totalTrx = 0, totalSukses = 0;
