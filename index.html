@@ -10,446 +10,83 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    /* ----- RESET & VARIABEL ----- */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    /* ===== S T Y L E ===== (sama seperti sebelumnya) */
+    * { margin:0; padding:0; box-sizing:border-box; }
     :root {
       --primary: #7c3aed;
       --primary-light: #a78bfa;
       --primary-dark: #5b21b6;
       --bg: #f3f4f6;
-      --surface: rgba(255, 255, 255, 0.75);
+      --surface: rgba(255,255,255,0.75);
       --surface-solid: #ffffff;
       --text: #1f2937;
       --text-muted: #6b7280;
-      --shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+      --shadow: 0 8px 32px rgba(0,0,0,0.06);
       --radius: 20px;
-      --border: rgba(255, 255, 255, 0.4);
+      --border: rgba(255,255,255,0.4);
     }
-    body {
-      font-family: 'Inter', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      padding-bottom: 40px;
-      line-height: 1.5;
-    }
-    /* ----- HEADER GLASS ----- */
-    .header {
-      background: rgba(124, 58, 237, 0.85);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      color: #fff;
-      padding: 18px 24px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 4px 20px rgba(124, 58, 237, 0.25);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-    }
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 18px;
-      font-weight: 800;
-      letter-spacing: -0.3px;
-    }
-    .brand-icon {
-      background: rgba(255, 255, 255, 0.2);
-      width: 40px;
-      height: 40px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      backdrop-filter: blur(4px);
-    }
-    .badge-version {
-      font-size: 11px;
-      font-weight: 600;
-      opacity: 0.8;
-      background: rgba(255, 255, 255, 0.15);
-      padding: 4px 12px;
-      border-radius: 40px;
-    }
-
-    /* ----- CONTAINER ----- */
-    .container {
-      max-width: 1440px;
-      margin: 0 auto;
-      padding: 20px 24px;
-    }
-
-    /* ----- FILTER BAR GLASS ----- */
-    .filter-bar {
-      background: var(--surface);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      padding: 18px 20px;
-      border-radius: var(--radius);
-      display: flex;
-      gap: 16px;
-      margin-bottom: 28px;
-      box-shadow: var(--shadow);
-      flex-wrap: wrap;
-      align-items: flex-end;
-      border: 1px solid var(--border);
-    }
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      flex: 1;
-      min-width: 150px;
-    }
-    .field label {
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      letter-spacing: 0.4px;
-    }
-    .field input,
-    .field select {
-      padding: 10px 14px;
-      border: 1px solid rgba(0, 0, 0, 0.06);
-      border-radius: 12px;
-      font-family: inherit;
-      font-size: 13px;
-      background: rgba(255, 255, 255, 0.7);
-      backdrop-filter: blur(4px);
-      color: var(--text);
-      font-weight: 600;
-      transition: 0.2s;
-      outline: none;
-    }
-    .field input:focus,
-    .field select:focus {
-      border-color: var(--primary);
-      background: #ffffff;
-      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
-    }
-
-    /* ----- SECTION WRAPPER ----- */
-    .section-wrapper {
-      margin-bottom: 28px;
-    }
-
-    /* ----- SECTION HEADER GLASS ----- */
-    .section-header {
-      background: var(--surface);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      padding: 16px 20px;
-      border-radius: var(--radius);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      cursor: pointer;
-      box-shadow: var(--shadow);
-      margin-bottom: 14px;
-      border: 1px solid var(--border);
-      transition: 0.2s;
-    }
-    .section-header:hover {
-      border-color: var(--primary-light);
-      transform: translateY(-1px);
-    }
-    .section-title {
-      font-size: 15px;
-      font-weight: 800;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .section-title i {
-      color: var(--primary);
-      font-size: 18px;
-    }
-    .toggle-btn {
-      background: rgba(124, 58, 237, 0.08);
-      color: var(--primary);
-      border: none;
-      width: 34px;
-      height: 34px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-    .toggle-btn:hover {
-      background: var(--primary);
-      color: #fff;
-    }
-
-    .section-content {
-      display: block;
-      animation: fadeSlide 0.3s ease-out;
-    }
-    @keyframes fadeSlide {
-      0% {
-        opacity: 0;
-        transform: translateY(-8px);
-      }
-      100% {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    /* ----- KPI GRID ----- */
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 16px;
-      margin-bottom: 18px;
-    }
-    .card {
-      background: var(--surface);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      border: 1px solid var(--border);
-      overflow: hidden;
-      transition: 0.2s;
-    }
-    .card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
-    }
-
-    .kpi-card {
-      padding: 18px 20px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-    .kpi-icon {
-      width: 50px;
-      height: 50px;
-      border-radius: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 22px;
-      flex-shrink: 0;
-      color: #fff;
-    }
-    .kpi-icon.violet {
-      background: linear-gradient(135deg, #7c3aed, #a78bfa);
-    }
-    .kpi-icon.magenta {
-      background: linear-gradient(135deg, #db2777, #f472b6);
-    }
-    .kpi-icon.cyan {
-      background: linear-gradient(135deg, #0891b2, #22d3ee);
-    }
-    .kpi-icon.green {
-      background: linear-gradient(135deg, #059669, #34d399);
-    }
-    .kpi-val {
-      font-size: 20px;
-      font-weight: 800;
-      color: var(--text);
-      margin: 2px 0;
-      letter-spacing: -0.2px;
-    }
-    .kpi-lbl {
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-    }
-
-    /* ----- GRID 2 COL ----- */
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      margin-bottom: 16px;
-    }
-
-    .card-header {
-      padding: 16px 18px;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.04);
-      font-weight: 700;
-      font-size: 13px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      color: var(--text);
-    }
-    .card-body {
-      padding: 16px 18px;
-    }
-
-    .chart-container {
-      position: relative;
-      width: 100%;
-      height: 220px;
-    }
-
-    /* ----- TABLE ----- */
-    .table-responsive {
-      overflow-x: auto;
-      overflow-y: auto;
-      max-height: 280px;
-      -webkit-overflow-scrolling: touch;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 12px;
-      text-align: left;
-      min-width: 500px;
-    }
-    .table-responsive thead th {
-      position: sticky;
-      top: 0;
-      background: var(--surface-solid);
-      z-index: 10;
-      border-bottom: 2px solid rgba(0, 0, 0, 0.04);
-    }
-    th {
-      padding: 12px 10px;
-      color: var(--text-muted);
-      font-weight: 700;
-      white-space: nowrap;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-    }
-    td {
-      padding: 12px 10px;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.04);
-    }
-
-    /* ----- BADGE ----- */
-    .badge {
-      padding: 4px 10px;
-      border-radius: 40px;
-      font-size: 10px;
-      font-weight: 700;
-      display: inline-block;
-      white-space: nowrap;
-    }
-    .bg-g {
-      background: #d1fae5;
-      color: #065f46;
-    }
-    .bg-r {
-      background: #fee2e2;
-      color: #991b1b;
-    }
-    .bg-y {
-      background: #fef3c7;
-      color: #92400e;
-    }
-    .bg-violet {
-      background: #ede9fe;
-      color: #5b21b6;
-    }
-
-    /* ----- ALERT TOPUP ----- */
-    .alert {
-      padding: 10px 14px;
-      border-radius: 12px;
-      font-weight: 600;
-      font-size: 11px;
-      margin-bottom: 8px;
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      background: #ecfdf5;
-      border: 1px solid #a7f3d0;
-      color: #065f46;
-    }
-
-    /* ----- LOADING ----- */
-    #loading {
-      text-align: center;
-      padding: 15vh 20px;
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--primary);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 14px;
-    }
-    .spinner {
-      width: 48px;
-      height: 48px;
-      border: 4px solid rgba(124, 58, 237, 0.15);
-      border-top-color: var(--primary);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    /* ----- RESPONSIVE ----- */
-    @media (max-width: 768px) {
-      .header {
-        padding: 14px 16px;
-      }
-      .brand {
-        font-size: 15px;
-      }
-      .brand-icon {
-        width: 34px;
-        height: 34px;
-        font-size: 16px;
-      }
-      .container {
-        padding: 12px 16px;
-      }
-      .filter-bar {
-        flex-direction: column;
-        gap: 10px;
-        padding: 14px;
-      }
-      .field {
-        min-width: 100%;
-      }
-      .kpi-grid {
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-      }
-      .kpi-card {
-        flex-direction: column;
-        text-align: center;
-        padding: 14px 10px;
-        gap: 6px;
-      }
-      .kpi-val {
-        font-size: 17px;
-      }
-      .grid-2 {
-        grid-template-columns: 1fr;
-        gap: 12px;
-      }
-      .chart-container {
-        height: 180px;
-      }
-      .section-header {
-        padding: 12px 14px;
-      }
+    body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); padding-bottom:40px; line-height:1.5; }
+    .header { background:rgba(124,58,237,0.85); backdrop-filter:blur(12px); color:#fff; padding:18px 24px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 4px 20px rgba(124,58,237,0.25); position:sticky; top:0; z-index:100; border-bottom:1px solid rgba(255,255,255,0.15); }
+    .brand { display:flex; align-items:center; gap:12px; font-size:18px; font-weight:800; letter-spacing:-0.3px; }
+    .brand-icon { background:rgba(255,255,255,0.2); width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:20px; backdrop-filter:blur(4px); }
+    .badge-version { font-size:11px; font-weight:600; opacity:0.8; background:rgba(255,255,255,0.15); padding:4px 12px; border-radius:40px; }
+    .container { max-width:1440px; margin:0 auto; padding:20px 24px; }
+    .filter-bar { background:var(--surface); backdrop-filter:blur(8px); padding:18px 20px; border-radius:var(--radius); display:flex; gap:16px; margin-bottom:28px; box-shadow:var(--shadow); flex-wrap:wrap; align-items:flex-end; border:1px solid var(--border); }
+    .field { display:flex; flex-direction:column; gap:6px; flex:1; min-width:150px; }
+    .field label { font-size:11px; font-weight:700; text-transform:uppercase; color:var(--text-muted); letter-spacing:0.4px; }
+    .field input, .field select { padding:10px 14px; border:1px solid rgba(0,0,0,0.06); border-radius:12px; font-family:inherit; font-size:13px; background:rgba(255,255,255,0.7); backdrop-filter:blur(4px); color:var(--text); font-weight:600; transition:0.2s; outline:none; }
+    .field input:focus, .field select:focus { border-color:var(--primary); background:#ffffff; box-shadow:0 0 0 3px rgba(124,58,237,0.15); }
+    .section-wrapper { margin-bottom:28px; }
+    .section-header { background:var(--surface); backdrop-filter:blur(8px); padding:16px 20px; border-radius:var(--radius); display:flex; justify-content:space-between; align-items:center; cursor:pointer; box-shadow:var(--shadow); margin-bottom:14px; border:1px solid var(--border); transition:0.2s; }
+    .section-header:hover { border-color:var(--primary-light); transform:translateY(-1px); }
+    .section-title { font-size:15px; font-weight:800; display:flex; align-items:center; gap:10px; }
+    .section-title i { color:var(--primary); font-size:18px; }
+    .toggle-btn { background:rgba(124,58,237,0.08); color:var(--primary); border:none; width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:14px; cursor:pointer; transition:0.2s; }
+    .toggle-btn:hover { background:var(--primary); color:#fff; }
+    .section-content { display:block; animation:fadeSlide 0.3s ease-out; }
+    @keyframes fadeSlide { 0%{opacity:0;transform:translateY(-8px);} 100%{opacity:1;transform:translateY(0);} }
+    .kpi-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; margin-bottom:18px; }
+    .card { background:var(--surface); backdrop-filter:blur(8px); border-radius:var(--radius); box-shadow:var(--shadow); border:1px solid var(--border); overflow:hidden; transition:0.2s; }
+    .card:hover { transform:translateY(-2px); box-shadow:0 12px 40px rgba(0,0,0,0.08); }
+    .kpi-card { padding:18px 20px; display:flex; align-items:center; gap:16px; }
+    .kpi-icon { width:50px; height:50px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; color:#fff; }
+    .kpi-icon.violet { background:linear-gradient(135deg,#7c3aed,#a78bfa); }
+    .kpi-icon.magenta { background:linear-gradient(135deg,#db2777,#f472b6); }
+    .kpi-icon.cyan { background:linear-gradient(135deg,#0891b2,#22d3ee); }
+    .kpi-icon.green { background:linear-gradient(135deg,#059669,#34d399); }
+    .kpi-val { font-size:20px; font-weight:800; color:var(--text); margin:2px 0; letter-spacing:-0.2px; }
+    .kpi-lbl { font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.3px; }
+    .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+    .card-header { padding:16px 18px; border-bottom:1px solid rgba(0,0,0,0.04); font-weight:700; font-size:13px; display:flex; justify-content:space-between; align-items:center; color:var(--text); }
+    .card-body { padding:16px 18px; }
+    .chart-container { position:relative; width:100%; height:220px; }
+    .table-responsive { overflow-x:auto; overflow-y:auto; max-height:280px; -webkit-overflow-scrolling:touch; }
+    table { width:100%; border-collapse:collapse; font-size:12px; text-align:left; min-width:500px; }
+    .table-responsive thead th { position:sticky; top:0; background:var(--surface-solid); z-index:10; border-bottom:2px solid rgba(0,0,0,0.04); }
+    th { padding:12px 10px; color:var(--text-muted); font-weight:700; white-space:nowrap; font-size:11px; text-transform:uppercase; letter-spacing:0.3px; }
+    td { padding:12px 10px; border-bottom:1px solid rgba(0,0,0,0.04); }
+    .badge { padding:4px 10px; border-radius:40px; font-size:10px; font-weight:700; display:inline-block; white-space:nowrap; }
+    .bg-g { background:#d1fae5; color:#065f46; }
+    .bg-r { background:#fee2e2; color:#991b1b; }
+    .bg-y { background:#fef3c7; color:#92400e; }
+    .bg-violet { background:#ede9fe; color:#5b21b6; }
+    .alert { padding:10px 14px; border-radius:12px; font-weight:600; font-size:11px; margin-bottom:8px; display:flex; gap:10px; align-items:center; background:#ecfdf5; border:1px solid #a7f3d0; color:#065f46; }
+    #loading { text-align:center; padding:15vh 20px; font-size:16px; font-weight:700; color:var(--primary); display:flex; flex-direction:column; align-items:center; gap:14px; }
+    .spinner { width:48px; height:48px; border:4px solid rgba(124,58,237,0.15); border-top-color:var(--primary); border-radius:50%; animation:spin 0.8s linear infinite; }
+    @keyframes spin { to{transform:rotate(360deg);} }
+    @media (max-width:768px) {
+      .header { padding:14px 16px; }
+      .brand { font-size:15px; }
+      .brand-icon { width:34px; height:34px; font-size:16px; }
+      .container { padding:12px 16px; }
+      .filter-bar { flex-direction:column; gap:10px; padding:14px; }
+      .field { min-width:100%; }
+      .kpi-grid { grid-template-columns:1fr 1fr; gap:10px; }
+      .kpi-card { flex-direction:column; text-align:center; padding:14px 10px; gap:6px; }
+      .kpi-val { font-size:17px; }
+      .grid-2 { grid-template-columns:1fr; gap:12px; }
+      .chart-container { height:180px; }
+      .section-header { padding:12px 14px; }
     }
   </style>
 </head>
@@ -464,6 +101,7 @@
     </div>
     <div style="font-size:12px; opacity:0.8;">
       <i class="fa-regular fa-clock"></i> <span id="lastUpdate">Memuat...</span>
+      <span style="margin-left:12px; background:rgba(255,255,255,0.1); padding:2px 10px; border-radius:40px;" id="lastRefresh">⏳ refreshing...</span>
     </div>
   </header>
 
@@ -494,10 +132,10 @@
     <!-- DASHBOARD -->
     <div id="dashboardContent" style="display:none;">
 
-      <!-- ===== SECTION 1: SUMMARY ===== -->
+      <!-- SECTION 1: SUMMARY -->
       <div class="section-wrapper">
         <div class="section-header" onclick="toggleSection('sec-exec')">
-          <h2 class="section-title"><i class="fa-solid fa-chart-pie"></i>Ringkasan Eksekutif</h2>
+          <h2 class="section-title"><i class="fa-solid fa-chart-pie"></i> Ringkasan Eksekutif</h2>
           <button class="toggle-btn"><i class="fa-solid fa-chevron-up" id="icon-sec-exec"></i></button>
         </div>
         <div class="section-content" id="sec-exec">
@@ -521,21 +159,21 @@
           </div>
           <div class="grid-2">
             <div class="card">
-              <div class="card-header">Tren Omzet Global<i class="fa-solid fa-arrow-trend-up" style="color:var(--primary)"></i></div>
+              <div class="card-header">Tren Omzet Global <i class="fa-solid fa-arrow-trend-up" style="color:var(--primary)"></i></div>
               <div class="card-body"><div class="chart-container"><canvas id="c-trendTotal"></canvas></div></div>
             </div>
             <div class="card">
-              <div class="card-header">Tren Multi-Reseller<i class="fa-solid fa-users" style="color:var(--primary-light)"></i></div>
+              <div class="card-header">Tren Multi-Reseller <i class="fa-solid fa-users" style="color:var(--primary-light)"></i></div>
               <div class="card-body"><div class="chart-container"><canvas id="c-trendMulti"></canvas></div></div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- ===== SECTION 2: SYSTEM ===== -->
+      <!-- SECTION 2: SYSTEM -->
       <div class="section-wrapper">
         <div class="section-header" onclick="toggleSection('sec-sys')">
-          <h2 class="section-title"><i class="fa-solid fa-server"></i>System & Modul Health</h2>
+          <h2 class="section-title"><i class="fa-solid fa-server"></i> System & Modul Health</h2>
           <button class="toggle-btn"><i class="fa-solid fa-chevron-up" id="icon-sec-sys"></i></button>
         </div>
         <div class="section-content" id="sec-sys">
@@ -561,10 +199,10 @@
         </div>
       </div>
 
-      <!-- ===== SECTION 3: PRODUK & FINANSIAL ===== -->
+      <!-- SECTION 3: PRODUK -->
       <div class="section-wrapper">
         <div class="section-header" onclick="toggleSection('sec-prod')">
-          <h2 class="section-title"><i class="fa-solid fa-box-open"></i>Finansial & Produk</h2>
+          <h2 class="section-title"><i class="fa-solid fa-box-open"></i> Finansial & Produk</h2>
           <button class="toggle-btn"><i class="fa-solid fa-chevron-up" id="icon-sec-prod"></i></button>
         </div>
         <div class="section-content" id="sec-prod">
@@ -574,29 +212,29 @@
               <div class="card-body"><div class="chart-container"><canvas id="c-dayWeek"></canvas></div></div>
             </div>
             <div class="card">
-              <div class="card-header">Tren Top-Up<i class="fa-solid fa-arrow-up-right-dots" style="color:var(--primary-light)"></i></div>
+              <div class="card-header">Tren Top-Up <i class="fa-solid fa-arrow-up-right-dots" style="color:var(--primary-light)"></i></div>
               <div class="card-body"><div class="chart-container"><canvas id="c-topupTrend"></canvas></div></div>
             </div>
           </div>
           <div class="grid-2">
             <div class="card">
-              <div class="card-header"><span style="color:var(--primary-dark)"><i class="fa-solid fa-skull"></i>Revenue x Margin</span></div>
+              <div class="card-header"><span style="color:var(--primary-dark)"><i class="fa-solid fa-skull"></i> Produk Zombie (Margin Tipis)</span></div>
               <div class="card-body table-responsive">
                 <table><thead><tr><th>Produk</th><th>Trx</th><th>HPP Rata-rata</th><th>Margin</th></tr></thead><tbody id="tbl-zombie"></tbody></table>
               </div>
             </div>
             <div class="card">
-              <div class="card-header"><i class="fa-solid fa-money-bill-transfer"></i>Riwayat Top-Up</div>
+              <div class="card-header"><i class="fa-solid fa-money-bill-transfer"></i> Riwayat Top-Up</div>
               <div class="card-body table-responsive" id="topupBox" style="padding-top:10px;"></div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- ===== SECTION 4: RESELLER ===== -->
+      <!-- SECTION 4: RESELLER -->
       <div class="section-wrapper">
         <div class="section-header" onclick="toggleSection('sec-sales')">
-          <h2 class="section-title"><i class="fa-solid fa-users-rays"></i>Reseller Analytics</h2>
+          <h2 class="section-title"><i class="fa-solid fa-users-rays"></i> Reseller Analytics</h2>
           <button class="toggle-btn"><i class="fa-solid fa-chevron-up" id="icon-sec-sales"></i></button>
         </div>
         <div class="section-content" id="sec-sales">
@@ -620,7 +258,7 @@
 
   <script>
     // ==========================================================
-    // KONFIGURASI SUPABASE (GANTI DENGAN MILIK ANDA)
+    // KONFIGURASI SUPABASE
     // ==========================================================
     const SUPABASE_URL = 'https://smzvlyhfqgvocqckudss.supabase.co';      // Ganti!
     const SUPABASE_ANON_KEY = 'sb_publishable_kwTA1M0rLb4sy-wuRWFGlQ_sbawszSM'; // Ganti!
@@ -628,77 +266,75 @@
     const supabase = supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // ==========================================================
-    // VARIABEL GLOBAL
+    // VARIABEL
     // ==========================================================
     let charts = {};
-    let allData = { daily: [], resellers: [], gateways: [], products: [], hourly: [], topup: [], dayWeek: [] };
-    let resellerList = [];
+    let allData = {};
 
     // ==========================================================
     // FUNGSI BANTUAN
     // ==========================================================
     const rp = n => 'Rp ' + Math.round(n || 0).toLocaleString('id-ID');
     const toDateInput = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    const hariIndo = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+    const hariIndo = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
 
     function toggleSection(id) {
       const el = document.getElementById(id);
-      const icon = document.getElementById('icon-' + id);
+      const icon = document.getElementById('icon-'+id);
       if (el.style.display === 'none') {
         el.style.display = 'block';
-        icon.classList.replace('fa-chevron-down', 'fa-chevron-up');
+        icon.classList.replace('fa-chevron-down','fa-chevron-up');
       } else {
         el.style.display = 'none';
-        icon.classList.replace('fa-chevron-up', 'fa-chevron-down');
+        icon.classList.replace('fa-chevron-up','fa-chevron-down');
       }
     }
 
     // ==========================================================
-    // AMBIL DATA DARI VIEW
+    // AMBIL DATA DARI TABEL MATERIALIZED (SUPER CEPAT)
     // ==========================================================
     async function fetchAllViews(start, end) {
-      // 1. Daily summary
-      let queryDaily = supabase.from('daily_summary').select('*').order('tanggal', { ascending: true });
-      if (start) queryDaily = queryDaily.gte('tanggal', start);
-      if (end) queryDaily = queryDaily.lte('tanggal', end);
-      const { data: daily, error: e1 } = await queryDaily;
+      const [daily, resellers, gateways, products, hourly, topup, dayWeek, resellerDaily, resellerWeekly] = await Promise.all([
+        // 1. Daily summary (materialized)
+        supabase.from('daily_summary_materialized').select('*')
+          .gte('tanggal', start).lte('tanggal', end).order('tanggal', { ascending: true }),
+        // 2. Reseller summary (materialized)
+        supabase.from('reseller_summary_materialized').select('*'),
+        // 3. Gateway summary (materialized)
+        supabase.from('gateway_summary_materialized').select('*'),
+        // 4. Product summary (materialized)
+        supabase.from('product_summary_materialized').select('*'),
+        // 5. Hourly stats (materialized)
+        supabase.from('hourly_stats_materialized').select('*').order('jam', { ascending: true }),
+        // 6. Top-up summary (materialized)
+        supabase.from('topup_summary_materialized').select('*')
+          .gte('tanggal', start).lte('tanggal', end).order('tanggal', { ascending: true }),
+        // 7. Day of week summary (materialized)
+        supabase.from('day_of_week_summary_materialized').select('*').order('day_index'),
+        // 8. Reseller daily (materialized) – diambil 500 baris terakhir
+        supabase.from('reseller_daily_summary_materialized').select('*')
+          .gte('tanggal', start).lte('tanggal', end).order('tanggal', { ascending: true }).limit(500),
+        // 9. Reseller weekly (materialized)
+        supabase.from('reseller_weekly_summary_materialized').select('*')
+      ]);
 
-      // 2. Reseller summary (semua)
-      const { data: resellers, error: e2 } = await supabase.from('reseller_summary').select('*');
-
-      // 3. Gateway summary
-      const { data: gateways, error: e3 } = await supabase.from('gateway_summary').select('*');
-
-      // 4. Product summary
-      const { data: products, error: e4 } = await supabase.from('product_summary').select('*');
-
-      // 5. Hourly stats
-      const { data: hourly, error: e5 } = await supabase.from('hourly_stats').select('*').order('jam', { ascending: true });
-
-      // 6. Top-up summary (filter tanggal)
-      let queryTopup = supabase.from('topup_summary').select('*').order('tanggal', { ascending: true });
-      if (start) queryTopup = queryTopup.gte('tanggal', start);
-      if (end) queryTopup = queryTopup.lte('tanggal', end);
-      const { data: topup, error: e6 } = await queryTopup;
-
-      // 7. Day of week summary
-      const { data: dayWeek, error: e7 } = await supabase.from('day_of_week_summary').select('*').order('day_index');
-
-      // 8. Reseller daily (untuk tren multi) – ambil hanya 30 hari terakhir dan top 5 reseller
-      let queryRD = supabase.from('reseller_daily_summary').select('*').order('tanggal', { ascending: true }).limit(500);
-      if (start) queryRD = queryRD.gte('tanggal', start);
-      if (end) queryRD = queryRD.lte('tanggal', end);
-      const { data: resellerDaily, error: e8 } = await queryRD;
-
-      // 9. Reseller weekly (untuk velocity)
-      const { data: resellerWeekly, error: e9 } = await supabase.from('reseller_weekly_summary').select('*');
-
-      if (e1 || e2 || e3 || e4 || e5 || e6 || e7 || e8 || e9) {
-        console.error('Error fetching views:', e1 || e2 || e3 || e4 || e5 || e6 || e7 || e8 || e9);
+      if (daily.error || resellers.error || gateways.error || products.error || hourly.error || 
+          topup.error || dayWeek.error || resellerDaily.error || resellerWeekly.error) {
+        console.error('Fetch errors:', daily.error, resellers.error, gateways.error, products.error, hourly.error, topup.error, dayWeek.error, resellerDaily.error, resellerWeekly.error);
         return null;
       }
 
-      return { daily, resellers, gateways, products, hourly, topup, dayWeek, resellerDaily, resellerWeekly };
+      return {
+        daily: daily.data || [],
+        resellers: resellers.data || [],
+        gateways: gateways.data || [],
+        products: products.data || [],
+        hourly: hourly.data || [],
+        topup: topup.data || [],
+        dayWeek: dayWeek.data || [],
+        resellerDaily: resellerDaily.data || [],
+        resellerWeekly: resellerWeekly.data || []
+      };
     }
 
     // ==========================================================
@@ -721,7 +357,7 @@
 
       allData = data;
 
-      // Update dropdown reseller
+      // Update dropdown reseller dari reseller_summary_materialized
       const sel = document.getElementById('resellerFilter');
       const currentVal = sel.value;
       sel.innerHTML = '<option value="">Semua Reseller</option>';
@@ -734,39 +370,33 @@
       });
       sel.value = currentVal;
 
-      // Filter reseller untuk tampilan
-      const rFilter = sel.value;
-      const filteredResellers = rFilter ? data.resellers.filter(r => r.reseller === rFilter) : data.resellers;
-
       // Proses tampilan
-      renderDashboard(data, filteredResellers, rFilter);
+      renderDashboard(data);
 
       loadingEl.style.display = 'none';
       contentEl.style.display = 'block';
       document.getElementById('lastUpdate').innerText = new Date().toLocaleTimeString('id-ID');
+      document.getElementById('lastRefresh').innerHTML = '✅ data terakhir: ' + new Date().toLocaleString('id-ID');
     }
 
     // ==========================================================
-    // RENDER DASHBOARD
+    // RENDER DASHBOARD (sama seperti sebelumnya)
     // ==========================================================
-    function renderDashboard(data, filteredResellers, rFilter) {
+    function renderDashboard(data) {
       // === KPI ===
-      let totalOmzet = 0,
-        totalLaba = 0,
-        totalTrx = 0,
-        totalSukses = 0;
+      let totalOmzet=0, totalLaba=0, totalTrx=0, totalSukses=0;
       data.daily.forEach(d => {
         totalOmzet += Number(d.omzet) || 0;
         totalLaba += Number(d.laba) || 0;
         totalTrx += Number(d.total_trx) || 0;
         totalSukses += Number(d.sukses) || 0;
       });
-      const successRate = totalTrx > 0 ? ((totalSukses / totalTrx) * 100).toFixed(1) : 0;
+      const successRate = totalTrx>0 ? ((totalSukses/totalTrx)*100).toFixed(1) : 0;
 
       document.getElementById('kpiOmzetTotal').innerText = rp(totalOmzet);
       document.getElementById('kpiLabaTotal').innerText = rp(totalLaba);
       document.getElementById('kpiTrxComp').innerText = totalTrx.toLocaleString('id-ID');
-      document.getElementById('kpiSuccessRate').innerText = successRate + '%';
+      document.getElementById('kpiSuccessRate').innerText = successRate+'%';
 
       // === TREN GLOBAL ===
       const tKeys = data.daily.map(d => d.tanggal);
@@ -789,14 +419,14 @@
         if (!rMap[d.reseller]) rMap[d.reseller] = {};
         rMap[d.reseller][d.tanggal] = Number(d.omzet) || 0;
       });
-      const sortedRes = Object.keys(rMap).sort((a, b) => {
-        const sumA = Object.values(rMap[a]).reduce((s, v) => s + v, 0);
-        const sumB = Object.values(rMap[b]).reduce((s, v) => s + v, 0);
+      const sortedRes = Object.keys(rMap).sort((a,b) => {
+        const sumA = Object.values(rMap[a]).reduce((s,v)=>s+v,0);
+        const sumB = Object.values(rMap[b]).reduce((s,v)=>s+v,0);
         return sumB - sumA;
-      }).slice(0, 5);
+      }).slice(0,5);
 
-      const palette = ['#7c3aed', '#db2777', '#0891b2', '#d97706', '#059669'];
-      const multiDatasets = sortedRes.map((name, idx) => ({
+      const palette = ['#7c3aed','#db2777','#0891b2','#d97706','#059669'];
+      const multiDatasets = sortedRes.map((name,idx) => ({
         label: name,
         data: tKeys.map(date => rMap[name][date] || 0),
         borderColor: palette[idx % palette.length],
@@ -808,17 +438,15 @@
       drawChart('c-trendMulti', 'line', tKeys, multiDatasets);
 
       // === STATUS DISTRIBUSI ===
-      const statusCount = {};
+      const statusCount = { sukses:0, gagal:0, timeout:0 };
       data.daily.forEach(d => {
-        const statuses = ['sukses', 'gagal', 'timeout'];
-        const counts = [d.sukses, d.gagal, d.timeout];
-        statuses.forEach((s, i) => {
-          statusCount[s] = (statusCount[s] || 0) + Number(counts[i] || 0);
-        });
+        statusCount.sukses += Number(d.sukses) || 0;
+        statusCount.gagal += Number(d.gagal) || 0;
+        statusCount.timeout += Number(d.timeout) || 0;
       });
-      const statusLabels = ['Sukses', 'Gagal', 'Timeout'];
-      const statusData = [statusCount.sukses || 0, statusCount.gagal || 0, statusCount.timeout || 0];
-      const colors = ['#10b981', '#ef4444', '#f59e0b'];
+      const statusLabels = ['Sukses','Gagal','Timeout'];
+      const statusData = [statusCount.sukses, statusCount.gagal, statusCount.timeout];
+      const colors = ['#10b981','#ef4444','#f59e0b'];
       drawChart('c-status', 'doughnut', statusLabels, [{
         data: statusData,
         backgroundColor: colors,
@@ -826,32 +454,23 @@
       }]);
 
       // === DUAL AXIS (jam) ===
-      const jamLabels = data.hourly.map(h => String(h.jam).padStart(2, '0') + ':00');
+      const jamLabels = data.hourly.map(h => String(h.jam).padStart(2,'0')+':00');
       const jamTotal = data.hourly.map(h => Number(h.total_trx) || 0);
       const jamError = data.hourly.map(h => Number(h.error_trx) || 0);
-      const errRate = jamTotal.map((t, i) => t > 0 ? (jamError[i] / t) * 100 : 0);
+      const errRate = jamTotal.map((t,i) => t>0 ? (jamError[i]/t)*100 : 0);
       drawChartDual('c-dualAxis', jamLabels, jamTotal, errRate);
 
       // === GATEWAY TABLE ===
       const gateways = data.gateways || [];
       let gwHtml = '';
-      gateways.sort((a, b) => b.total_trx - a.total_trx);
+      gateways.sort((a,b) => b.total_trx - a.total_trx);
       gateways.forEach(g => {
-        const sr = g.total_trx > 0 ? (g.sukses / g.total_trx) * 100 : 0;
+        const sr = g.total_trx>0 ? (g.sukses/g.total_trx)*100 : 0;
         const lat = g.avg_latency_sec ? Number(g.avg_latency_sec).toFixed(1) : '-';
-        const statusBadge = (sr > 85 && (g.avg_latency_sec || 0) < 10) ?
+        const statusBadge = (sr>85 && (g.avg_latency_sec||0)<10) ?
           '<span class="badge bg-g">Optimal</span>' :
           '<span class="badge bg-r">Warning</span>';
-        gwHtml += `<tr>
-          <td><b>${g.modul}</b></td>
-          <td>${g.total_trx}</td>
-          <td><span style="color:#059669;font-weight:700;">${g.sukses}</span></td>
-          <td><span style="color:#dc2626;">${g.gagal||0}</span></td>
-          <td><span style="color:#d97706;">${g.timeout||0}</span></td>
-          <td><span class="badge ${sr>80?'bg-g':'bg-r'}">${sr.toFixed(1)}%</span></td>
-          <td>${lat}</td>
-          <td>${statusBadge}</td>
-        </tr>`;
+        gwHtml += `<tr><td><b>${g.modul}</b></td><td>${g.total_trx}</td><td><span style="color:#059669;font-weight:700;">${g.sukses}</span></td><td><span style="color:#dc2626;">${g.gagal||0}</span></td><td><span style="color:#d97706;">${g.timeout||0}</span></td><td><span class="badge ${sr>80?'bg-g':'bg-r'}">${sr.toFixed(1)}%</span></td><td>${lat}</td><td>${statusBadge}</td></tr>`;
       });
       document.getElementById('tbl-gateway').innerHTML = gwHtml || '<tr><td colspan="8" style="text-align:center;color:gray;">Tidak ada data gateway.</td></tr>';
 
@@ -859,7 +478,7 @@
       const dayData = Array(7).fill(0);
       (data.dayWeek || []).forEach(d => {
         const idx = Number(d.day_index);
-        if (idx >= 0 && idx < 7) dayData[idx] = Number(d.omzet) || 0;
+        if (idx>=0 && idx<7) dayData[idx] = Number(d.omzet) || 0;
       });
       drawChart('c-dayWeek', 'bar', hariIndo, [{
         label: 'Omzet',
@@ -875,14 +494,9 @@
         const totalHbeli = Number(p.total_hbeli) || 0;
         const totalLaba = Number(p.total_laba) || 0;
         const trx = Number(p.total_trx) || 0;
-        const roi = totalHbeli > 0 ? (totalLaba / totalHbeli) * 100 : 0;
-        if (trx > 3 && roi < 0.5) {
-          zombieHtml += `<tr>
-            <td><b>${p.produk}</b></td>
-            <td>${trx}</td>
-            <td>${rp((Number(p.avg_beli)||0))}</td>
-            <td><span class="badge bg-r">${roi.toFixed(2)}%</span></td>
-          </tr>`;
+        const roi = totalHbeli>0 ? (totalLaba/totalHbeli)*100 : 0;
+        if (trx>3 && roi<0.5) {
+          zombieHtml += `<tr><td><b>${p.produk}</b></td><td>${trx}</td><td>${rp((Number(p.avg_beli)||0))}</td><td><span class="badge bg-r">${roi.toFixed(2)}%</span></td></tr>`;
         }
       });
       document.getElementById('tbl-zombie').innerHTML = zombieHtml || '<tr><td colspan="4" style="text-align:center;color:gray;padding:15px;">Semua produk sehat.</td></tr>';
@@ -901,8 +515,8 @@
       const aggTopup = {};
       Object.keys(topupMap).forEach(modul => {
         const dates = Object.keys(topupMap[modul]).sort();
-        for (let i = 1; i < dates.length; i++) {
-          const prev = dates[i - 1];
+        for (let i=1; i<dates.length; i++) {
+          const prev = dates[i-1];
           const curr = dates[i];
           const prevVal = topupMap[modul][prev];
           const currVal = topupMap[modul][curr];
@@ -934,31 +548,24 @@
       });
       let velHtml = '';
       Object.keys(weeklyMap).forEach(res => {
-        const weeks = weeklyMap[res].sort((a, b) => a.minggu.localeCompare(b.minggu));
+        const weeks = weeklyMap[res].sort((a,b) => a.minggu.localeCompare(b.minggu));
         if (weeks.length < 2) return;
-        const last = weeks[weeks.length - 1];
-        const prev = weeks[weeks.length - 2];
-        const growth = prev.trx > 0 ? ((last.trx - prev.trx) / prev.trx) * 100 : 100;
+        const last = weeks[weeks.length-1];
+        const prev = weeks[weeks.length-2];
+        const growth = prev.trx>0 ? ((last.trx - prev.trx)/prev.trx)*100 : 100;
         let badge = '';
         if (growth > 20) badge = `<span class="badge bg-g">Naik +${growth.toFixed(0)}%</span>`;
         else if (growth < -20) badge = `<span class="badge bg-r">Drop ${growth.toFixed(0)}%</span>`;
         else badge = `<span class="badge bg-violet">Stabil</span>`;
-
-        velHtml += `<tr>
-          <td><b>${res}</b></td>
-          <td>${last.trx}</td>
-          <td>${prev.trx}</td>
-          <td>${badge}</td>
-          <td>-</td>
-        </tr>`;
+        velHtml += `<tr><td><b>${res}</b></td><td>${last.trx}</td><td>${prev.trx}</td><td>${badge}</td><td>-</td></tr>`;
       });
-      document.getElementById('tbl-velocity').innerHTML = velHtml.slice(0, 2000) || '<tr><td colspan="5" style="text-align:center;color:gray;">Data belum cukup.</td></tr>';
+      document.getElementById('tbl-velocity').innerHTML = velHtml.slice(0,2000) || '<tr><td colspan="5" style="text-align:center;color:gray;">Data belum cukup.</td></tr>';
 
       // === RFM ===
       let rfmHtml = '';
       const resellerFilter = document.getElementById('resellerFilter').value;
       const list = resellerFilter ? data.resellers.filter(r => r.reseller === resellerFilter) : data.resellers;
-      list.sort((a, b) => b.total_trx - a.total_trx);
+      list.sort((a,b) => b.total_trx - a.total_trx);
       list.forEach(r => {
         const daysAgo = Math.floor((new Date() - new Date(r.last_trx)) / (86400000));
         let tier = '';
@@ -966,16 +573,9 @@
         else if (daysAgo > 14) tier = '<span class="badge bg-r">Sleeping</span>';
         else tier = '<span class="badge bg-violet">Regular</span>';
         const avgDaily = r.active_days > 0 ? (r.total_trx / r.active_days).toFixed(1) : '0';
-        rfmHtml += `<tr>
-          <td><b>${r.reseller}</b></td>
-          <td>${tier}</td>
-          <td>${r.total_trx}</td>
-          <td>${rp(r.laba)}</td>
-          <td>${avgDaily} / hari</td>
-          <td>${daysAgo===0?'Hari ini':daysAgo+' hr lalu'}</td>
-        </tr>`;
+        rfmHtml += `<tr><td><b>${r.reseller}</b></td><td>${tier}</td><td>${r.total_trx}</td><td>${rp(r.laba)}</td><td>${avgDaily} / hari</td><td>${daysAgo===0?'Hari ini':daysAgo+' hr lalu'}</td></tr>`;
       });
-      document.getElementById('tbl-rfm').innerHTML = rfmHtml.slice(0, 2000) || '<tr><td colspan="6" style="text-align:center;color:gray;">Tidak ada data reseller.</td></tr>';
+      document.getElementById('tbl-rfm').innerHTML = rfmHtml.slice(0,2000) || '<tr><td colspan="6" style="text-align:center;color:gray;">Tidak ada data reseller.</td></tr>';
     }
 
     // ==========================================================
@@ -1015,20 +615,10 @@
           type: 'bar',
           data: {
             labels,
-            datasets: [{
-              label: 'Volume Trx',
-              data: data1,
-              backgroundColor: 'rgba(124,58,237,0.2)',
-              borderRadius: 4,
-              yAxisID: 'y'
-            }, {
-              label: 'Error Rate %',
-              data: data2,
-              type: 'line',
-              borderColor: '#ef4444',
-              tension: 0.3,
-              yAxisID: 'y1'
-            }]
+            datasets: [
+              { label: 'Volume Trx', data: data1, backgroundColor: 'rgba(124,58,237,0.2)', borderRadius: 4, yAxisID: 'y' },
+              { label: 'Error Rate %', data: data2, type: 'line', borderColor: '#ef4444', tension: 0.3, yAxisID: 'y1' }
+            ]
           },
           options: {
             responsive: true,
