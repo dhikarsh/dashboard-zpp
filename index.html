@@ -10,7 +10,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    /* ===== STYLE (SAMA SEPERTI SEBELUMNYA) ===== */
+    /* ===== STYLE SAMA SEPERTI SEBELUMNYA ===== */
     * { margin:0; padding:0; box-sizing:border-box; }
     :root {
       --primary: #7c3aed;
@@ -93,7 +93,7 @@
       <!-- SECTION 1: SUMMARY -->
       <div class="section-wrapper">
         <div class="section-header" onclick="toggleSection('sec-exec')">
-          <h2 class="section-title"><i class="fa-solid fa-chart-pie"></i> Summary</h2>
+          <h2 class="section-title"><i class="fa-solid fa-chart-pie"></i> Ringkasan Eksekutif</h2>
           <button class="toggle-btn"><i class="fa-solid fa-chevron-up" id="icon-sec-exec"></i></button>
         </div>
         <div class="section-content" id="sec-exec">
@@ -104,8 +104,8 @@
             <div class="card kpi-card"><div class="kpi-icon green"><i class="fa-solid fa-percent"></i></div><div><div class="kpi-lbl">Success Rate</div><div class="kpi-val" id="kpiSuccessRate">0%</div></div></div>
           </div>
           <div class="grid-2">
-            <div class="card"><div class="card-header">Tren Omzet <i class="fa-solid fa-arrow-trend-up" style="color:var(--primary)"></i></div><div class="card-body"><div class="chart-container"><canvas id="c-trendTotal"></canvas></div></div></div>
-            <div class="card"><div class="card-header">Tren Reseller <i class="fa-solid fa-users" style="color:var(--primary-light)"></i></div><div class="card-body"><div class="chart-container"><canvas id="c-trendMulti"></canvas></div></div></div>
+            <div class="card"><div class="card-header">Tren Omzet Global <i class="fa-solid fa-arrow-trend-up" style="color:var(--primary)"></i></div><div class="card-body"><div class="chart-container"><canvas id="c-trendTotal"></canvas></div></div></div>
+            <div class="card"><div class="card-header">Tren Multi-Reseller <i class="fa-solid fa-users" style="color:var(--primary-light)"></i></div><div class="card-body"><div class="chart-container"><canvas id="c-trendMulti"></canvas></div></div></div>
           </div>
         </div>
       </div>
@@ -132,10 +132,10 @@
         <div class="section-content" id="sec-prod">
           <div class="grid-2">
             <div class="card"><div class="card-header">Pola Hari (Omzet)</div><div class="card-body"><div class="chart-container"><canvas id="c-dayWeek"></canvas></div></div></div>
-            <div class="card"><div class="card-header">Tren Top Up <i class="fa-solid fa-arrow-up-right-dots" style="color:var(--primary-light)"></i></div><div class="card-body"><div class="chart-container"><canvas id="c-topupTrend"></canvas></div></div></div>
+            <div class="card"><div class="card-header">Tren Top-Up <i class="fa-solid fa-arrow-up-right-dots" style="color:var(--primary-light)"></i></div><div class="card-body"><div class="chart-container"><canvas id="c-topupTrend"></canvas></div></div></div>
           </div>
           <div class="grid-2">
-            <div class="card"><div class="card-header"><span style="color:var(--primary-dark)"><i class="fa-solid fa-skull"></i> Product x Nargin</span></div><div class="card-body table-responsive"><table><thead><tr><th>Produk</th><th>Trx</th><th>HPP Rata-rata</th><th>Margin</th></tr></thead><tbody id="tbl-zombie"></tbody></table></div></div>
+            <div class="card"><div class="card-header"><span style="color:var(--primary-dark)"><i class="fa-solid fa-skull"></i> Produk Zombie (Margin Tipis)</span></div><div class="card-body table-responsive"><table><thead><tr><th>Produk</th><th>Trx</th><th>HPP Rata-rata</th><th>Margin</th></tr></thead><tbody id="tbl-zombie"></tbody></table></div></div>
             <div class="card"><div class="card-header"><i class="fa-solid fa-money-bill-transfer"></i> Riwayat Top-Up</div><div class="card-body table-responsive" id="topupBox" style="padding-top:10px;"></div></div>
           </div>
         </div>
@@ -155,21 +155,11 @@
   </div>
   <script>
     // ==========================================================
-    // KONFIGURASI SUPABASE (GANTI DENGAN MILIK ANDA)
+    // KONFIGURASI SUPABASE
     // ==========================================================
     const SUPABASE_URL = 'https://smzvlyhfqgvocqckudss.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_kwTA1M0rLb4sy-wuRWFGlQ_sbawszSM';
-
-    // Inisialisasi Supabase Client dengan aman (hindari deklarasi ulang)
-    let supabaseClient;
-    if (typeof supabase !== 'undefined' && typeof supabase.createClient === 'function') {
-      supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    } else if (typeof supabaseJs !== 'undefined' && typeof supabaseJs.createClient === 'function') {
-      supabaseClient = supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    } else {
-      // Fallback - jika tidak ada library, error akan muncul
-      alert('Supabase library not loaded!');
-    }
+    const supabase = supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let charts = {};
     let allData = {};
@@ -194,39 +184,31 @@
     // FETCH DATA DARI MATERIALIZED TABLES (PARALLEL)
     // ==========================================================
     async function fetchAllViews(start, end) {
-      // Pastikan supabaseClient tersedia
-      if (!supabaseClient) {
-        console.error('Supabase client not initialized');
-        return null;
-      }
-
-      // Semua query paralel menggunakan Promise.all
       const [
         dailyRes, resellerRes, gatewayRes, productRes,
         hourlyRes, topupRes, dayWeekRes, resellerDailyRes, weeklyRes
       ] = await Promise.all([
-        supabaseClient.from('daily_summary_materialized').select('*')
+        supabase.from('daily_summary_materialized').select('*')
           .gte('tanggal', start || '1900-01-01')
           .lte('tanggal', end || '3000-01-01')
           .order('tanggal', { ascending: true }),
-        supabaseClient.from('reseller_summary_materialized').select('*'),
-        supabaseClient.from('gateway_summary_materialized').select('*'),
-        supabaseClient.from('product_summary_materialized').select('*'),
-        supabaseClient.from('hourly_stats_materialized').select('*').order('jam', { ascending: true }),
-        supabaseClient.from('topup_summary_materialized').select('*')
+        supabase.from('reseller_summary_materialized').select('*'),
+        supabase.from('gateway_summary_materialized').select('*'),
+        supabase.from('product_summary_materialized').select('*'),
+        supabase.from('hourly_stats_materialized').select('*').order('jam', { ascending: true }),
+        supabase.from('topup_summary_materialized').select('*')
           .gte('tanggal', start || '1900-01-01')
           .lte('tanggal', end || '3000-01-01')
           .order('tanggal', { ascending: true }),
-        supabaseClient.from('day_of_week_summary_materialized').select('*').order('day_index'),
-        supabaseClient.from('reseller_daily_summary_materialized').select('*')
+        supabase.from('day_of_week_summary_materialized').select('*').order('day_index'),
+        supabase.from('reseller_daily_summary_materialized').select('*')
           .gte('tanggal', start || '1900-01-01')
           .lte('tanggal', end || '3000-01-01')
           .limit(500)
           .order('tanggal', { ascending: true }),
-        supabaseClient.from('reseller_weekly_summary_materialized').select('*')
+        supabase.from('reseller_weekly_summary_materialized').select('*')
       ]);
 
-      // Periksa error
       const errors = [dailyRes, resellerRes, gatewayRes, productRes, hourlyRes, topupRes, dayWeekRes, resellerDailyRes, weeklyRes]
         .filter(r => r.error);
       if (errors.length > 0) {
@@ -261,7 +243,14 @@
 
       const data = await fetchAllViews(start, end);
       if (!data) {
-        loadingEl.innerHTML = '<i class="fa-solid fa-circle-exclamation fa-2x"></i> <span>Gagal mengambil data. Cek log.</span>';
+        loadingEl.innerHTML = '<i class="fa-solid fa-circle-exclamation fa-2x"></i> <span>Gagal mengambil data. Periksa konsol.</span>';
+        return;
+      }
+
+      // Jika materialized kosong, coba fallback ke view biasa (peringatan)
+      if (data.daily.length === 0) {
+        console.warn('Materialized tables kosong. Pastikan refresh_all_summaries() sudah dijalankan.');
+        loadingEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation fa-2x"></i> <span>Data materialized kosong. Jalankan refresh_all_summaries() di Supabase.</span>';
         return;
       }
 
