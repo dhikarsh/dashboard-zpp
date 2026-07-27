@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard ZPP</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+  <!-- Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    /* ===== S T Y L E  (sama seperti sebelumnya, hanya sedikit modifikasi) ===== */
+    :root {
+      --primary: #8B5CF6;
+      --primary-dark: #7C3AED;
+      --primary-light: #EDE9FE;
+      --accent-magenta: #D946EF;
+      --accent-cyan: #06B6D4;
+      --success: #10B981;
+      --warning: #F59E0B;
+      --danger: #EF4444;
+      --bg: #F5F3FF;
+      --surface: #FFFFFF;
+      --border: #E2E8F0;
+      --text-main: #1E293B;
+      --text-muted: #64748B;
+      --radius: 16px;
+      --shadow: 0 4px 15px rgba(139, 92, 246, 0.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text-main); font-size: 13px; padding-bottom: 60px; line-height: 1.5; }
+    
+    .header { background: var(--primary); color: white; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2); position: sticky; top: 0; z-index: 100; }
+    .brand { display: flex; align-items: center; gap: 12px; font-size: 16px; font-weight: 800; letter-spacing: -0.5px; }
+    .brand-icon { background: rgba(255,255,255,0.2); width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+    
+    .container { padding: 20px; max-width: 1440px; margin: 0 auto; }
+    .filter-bar { background: var(--surface); padding: 16px; border-radius: var(--radius); display: flex; gap: 12px; margin-bottom: 20px; box-shadow: var(--shadow); flex-wrap: wrap; align-items: flex-end; }
+    .field { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 150px; }
+    .field label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+    .field input, .field select { padding: 10px 12px; border: 1px solid #E2E8F0; border-radius: 10px; font-family: inherit; font-size: 13px; outline: none; background: #F8FAFC; color: var(--text-main); font-weight: 600;}
+    .field input:focus, .field select:focus { border-color: var(--primary); background: #FFFFFF; }
+
+    .section-wrapper { margin-bottom: 24px; background: transparent; }
+    .section-header { background: var(--surface); padding: 16px 20px; border-radius: var(--radius); display: flex; justify-content: space-between; align-items: center; cursor: pointer; box-shadow: var(--shadow); margin-bottom: 12px; transition: 0.2s; border: 1px solid transparent; }
+    .section-header:hover { border-color: var(--primary-light); }
+    .section-title { font-size: 15px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 10px; margin: 0; }
+    .section-title i { color: var(--primary); font-size: 18px; }
+    .toggle-btn { background: var(--primary-light); color: var(--primary-dark); border: none; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; transition: 0.3s; }
+    .section-content { display: block; animation: fadeIn 0.3s ease-in-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 16px; }
+    .card { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); display: flex; flex-direction: column; overflow: hidden; }
+    .kpi-card { padding: 16px; display: flex; align-items: center; gap: 16px; }
+    .kpi-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+    .kpi-icon.violet { background: var(--primary); color: white; }
+    .kpi-icon.magenta { background: var(--accent-magenta); color: white; }
+    .kpi-icon.cyan { background: var(--accent-cyan); color: white; }
+    .kpi-icon.green { background: var(--success); color: white; }
+    .kpi-val { font-size: 18px; font-weight: 800; color: var(--text-main); margin: 2px 0; }
+    .kpi-lbl { font-size: 11px; font-weight: 700; color: var(--text-muted); }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .card-header { padding: 16px; border-bottom: 1px solid var(--border); font-weight: 800; font-size: 13px; display: flex; justify-content: space-between; align-items: center; }
+    .card-body { padding: 16px; }
+    .chart-container { position: relative; width: 100%; height: 230px; }
+
+    .table-responsive { overflow-x: auto; overflow-y: auto; max-height: 280px; -webkit-overflow-scrolling: touch; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; text-align: left; min-width: 500px; }
+    .table-responsive thead th { position: sticky; top: 0; background: var(--surface); z-index: 10; border-bottom: 2px solid var(--border); }
+    th { padding: 12px 10px; color: var(--text-muted); font-weight: 700; white-space: nowrap; }
+    td { padding: 12px 10px; border-bottom: 1px solid var(--border); }
+    
+    .badge { padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; display: inline-block; white-space: nowrap;}
+    .bg-g { background: #DCFCE7; color: #166534; } .bg-r { background: #FEE2E2; color: #991B1B; }
+    .bg-y { background: #FEF3C7; color: #92400E; } .bg-violet { background: var(--primary-light); color: var(--primary-dark); }
+    .c-magenta { color: var(--accent-magenta); font-weight: 800; }
+
+    .alert { padding: 10px 14px; border-radius: 10px; font-weight: 700; font-size: 11px; margin-bottom: 8px; display: flex; gap: 10px; align-items: center;}
+    .a-info { background: #F0FDF4; color: #15803D; border: 1px solid #BBF7D0; }
+    
+    #loading { text-align: center; padding: 15vh 20px; font-size: 16px; font-weight: 700; color: var(--primary); display: flex; flex-direction: column; align-items: center; gap: 10px; }
+
+    @media (max-width: 768px) {
+      .header { padding: 12px 16px; }
+      .brand { font-size: 14px; }
+      .brand-icon { width: 32px; height: 32px; font-size: 14px; }
+      .container { padding: 12px; }
+      .filter-bar { flex-direction: column; align-items: stretch; gap: 10px; padding: 12px; }
+      .field { min-width: 100%; }
+      .kpi-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+      .kpi-card { flex-direction: column; text-align: center; padding: 16px 12px; gap: 8px; }
+      .kpi-val { font-size: 16px; }
+      .grid-2 { grid-template-columns: 1fr; gap: 12px; }
+      .section-header { padding: 12px 16px; }
+      .chart-container { height: 200px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="brand"><div class="brand-icon"><i class="fa-solid fa-mobile-screen-button"></i></div> Dashboard ZPP</div>
+    <div style="font-size: 11px; font-weight: 700; opacity: 0.9;" id="lastUpdate">Supabase Engine</div>
+  </div>
+
+  <div class="container">
+    <div class="filter-bar">
+      <div class="field"><label>Dari Tanggal</label><input type="date" id="startDate" onchange="runEngine()"></div>
+      <div class="field"><label>Sampai Tanggal</label><input type="date" id="endDate" onchange="runEngine()"></div>
+      <div class="field"><label>Filter Reseller</label><select id="resellerFilter" onchange="runEngine()"><option value="">Semua Reseller</option></select></div>
+    </div>
+
+    <div id="loading"><i class="fa-solid fa-circle-notch fa-spin fa-2x"></i> <span>Memuat data dari Supabase...</span></div>
+
+    <div id="dashboardContent" style="display:none;">
+      <!-- Sama seperti sebelumnya, struktur section -->
+      <div class="section-wrapper">
+        <div class="section-header" onclick="toggleSection('sec-exec')">
+          <h2 class="section-title"><i class="fa-solid fa-chart-pie"></i> Summary</h2>
+          <button class="toggle-btn"><i class="fa-solid fa-chevron-up" id="icon-sec-exec"></i></button>
+        </div>
+        <div class="section-content" id="sec-exec">
+          <div class="kpi-grid">
+            <div class="card kpi-card"><div class="kpi-icon violet"><i class="fa-solid fa-wallet"></i></div><div><div class="kpi-lbl">Omzet Total</div><div class="kpi-val" id="kpiOmzetTotal">0</div></div></div>
+            <div class="card kpi-card"><div class="kpi-icon magenta"><i class="fa-solid fa-chart-line"></i></div><div><div class="kpi-lbl">Total Laba</div><div class="kpi-val" id="kpiLabaTotal">0</div></div></div>
+            <div class="card kpi-card"><div class="kpi-icon cyan"><i class="fa-solid fa-list-check"></i></div><div><div class="kpi-lbl">Total Trx</div><div class="kpi-val" id="kpiTrxComp">0 / 0</div></div></div>
+          </div>
+          <div class="grid-2">
+            <div class="card"><div class="card-header">Tren Global <i class="fa-solid fa-arrow-trend-up" style="color:var(--primary)"></i></div><div class="card-body"><div class="chart-container"><canvas id="c-trendTotal"></canvas></div></div></div>
+            <div class="card"><div class="card-header">Tren Reseller <i class="fa-solid fa-users" style="color:var(--accent-cyan)"></i></div><div class="card-body"><div class="chart-container"><canvas id="c-trendMulti"></canvas></div></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-wrapper">
+        <div class="section-header" onclick="toggleSection('sec-sys')">
+          <h2 class="section-title"><i class="fa-solid fa-server"></i> System & Modul Detail</h2>
+          <button class="toggle-btn"><i class="fa-solid fa-chevron-up" id="icon-sec-sys"></i></button>
+        </div>
+        <div class="section-content" id="sec-sys">
+          <div class="grid-2">
+            <div class="card"><div class="card-header">Status Trx</div><div class="card-body"><div class="chart-container"><canvas id="c-status"></canvas></div></div></div>
+            <div class="card"><div class="card-header">Volume Trx vs Error Rate (Per Jam)</div><div class="card-body"><div class="chart-container"><canvas id="c-dualAxis"></canvas></div></div></div>
+          </div>
+          <div class="card">
+            <div class="card-header">Efisiensi Modul & Detail Status per Gateway</div>
+            <div class="card-body table-responsive">
+              <table><thead><tr><th>Nama Modul</th><th>Total Trx</th><th>Sukses</th><th>Gagal</th><th>Timeout</th><th>Success Rate</th><th>Latency (detik)</th><th>Status</th></tr></thead><tbody id="tbl-gateway"></tbody></table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-wrapper">
+        <div class="section-header" onclick="toggleSection('sec-prod')">
+          <h2 class="section-title"><i class="fa-solid fa-box-open"></i> Finansial & Produk</h2>
+          <button class="toggle-btn"><i class="fa-solid fa-chevron-up" id="icon-sec-prod"></i></button>
+        </div>
+        <div class="section-content" id="sec-prod">
+          <div class="grid-2">
+            <div class="card"><div class="card-header">Pola Hari (Omzet)</div><div class="card-body"><div class="chart-container"><canvas id="c-dayWeek"></canvas></div></div></div>
+            <div class="card"><div class="card-header">Tren Top-Up <i class="fa-solid fa-arrow-up-right-dots" style="color:var(--accent-cyan)"></i></div><div class="card-body"><div class="chart-container"><canvas id="c-topupTrend"></canvas></div></div></div>
+          </div>
+          <div class="grid-2">
+            <div class="card"><div class="card-header"><span style="color:var(--danger)"><i class="fa-solid fa-skull"></i> Trx vs Margin</span></div><div class="card-body table-responsive"><table><thead><tr><th>Produk</th><th>Total Trx</th><th>HPP Terakhir</th><th>Margin ROI</th></tr></thead><tbody id="tbl-zombie"></tbody></table></div></div>
+            <div class="card"><div class="card-header"><i class="fa-solid fa-money-bill-transfer"></i> History Top Up Per Reseller</div><div class="card-body table-responsive" id="topupBox" style="padding-top:10px;"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-wrapper">
+        <div class="section-header" onclick="toggleSection('sec-sales')">
+          <h2 class="section-title"><i class="fa-solid fa-users-rays"></i> Reseller Analytics</h2>
+          <button class="toggle-btn"><i class="fa-solid fa-chevron-up" id="icon-sec-sales"></i></button>
+        </div>
+        <div class="section-content" id="sec-sales">
+          <div class="card" style="margin-bottom:16px;"><div class="card-header"><span class="c-magenta"><i class="fa-solid fa-stopwatch"></i> Velocity Tracker</span></div><div class="card-body table-responsive"><table><thead><tr><th>Reseller</th><th>Trx 7 Hr Terakhir</th><th>Trx 7-14 Hr Sblmnya</th><th>WoW</th><th>Produk Spesialis</th></tr></thead><tbody id="tbl-velocity"></tbody></table></div></div>
+          <div class="card"><div class="card-header">Segmentasi Reseller & Analisis Detail Performa</div><div class="card-body table-responsive"><table><thead><tr><th>Reseller</th><th>Tier</th><th>Total Trx</th><th>Laba</th><th>Avg Daily Trx</th><th>Aktif</th></tr></thead><tbody id="tbl-rfm"></tbody></table></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ========================================================
+    // KONFIGURASI SUPABASE (GANTI DENGAN MILIK ANDA)
+    // ========================================================
+    const SUPABASE_URL = 'https://smzvlyhfqgvocqckudss.supabase.co';   // Ganti dengan URL proyek Anda
+    const SUPABASE_ANON_KEY = 'sb_publishable_kwTA1M0rLb4sy-wuRWFGlQ_sbawszSM'; // Anon key
+
+    const supabase = supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // ========================================================
+    // VARIABEL GLOBAL
+    // ========================================================
+    let charts = {};
+    let allData = [];          // menyimpan data mentah dari Supabase (setelah filter)
+    let resellerList = new Set();
+
+    // ========================================================
+    // FUNGSI BANTUAN
+    // ========================================================
+    const rp = n => 'Rp ' + Math.round(n || 0).toLocaleString('id-ID');
+    const toDateInput = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const getDaysArr = () => ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+
+    function toggleSection(id) {
+      const el = document.getElementById(id);
+      const icon = document.getElementById('icon-' + id);
+      if (el.style.display === 'none') {
+        el.style.display = 'block';
+        icon.classList.replace('fa-chevron-down', 'fa-chevron-up');
+      } else {
+        el.style.display = 'none';
+        icon.classList.replace('fa-chevron-up', 'fa-chevron-down');
+      }
+    }
+
+    // ========================================================
+    // AMBIL DATA DARI SUPABASE
+    // ========================================================
+    async function fetchData() {
+      const start = document.getElementById('startDate').value;
+      const end = document.getElementById('endDate').value;
+
+      let query = supabase
+        .from('transactions')
+        .select('*')
+        .order('tgl_entri', { ascending: true });
+
+      if (start) query = query.gte('tgl_entri', start);
+      if (end) query = query.lte('tgl_entri', end);
+
+      // Batasi jumlah data untuk performa (ambil 10.000 terakhir)
+      // Anda bisa hapus limit jika sudah punya view agregasi
+      query = query.limit(10000);
+
+      const { data, error } = await query;
+      if (error) {
+        console.error('Error fetching data:', error);
+        alert('Gagal mengambil data dari Supabase: ' + error.message);
+        return [];
+      }
+      return data;
+    }
+
+    // ========================================================
+    // ENGINE UTAMA
+    // ========================================================
+    async function runEngine() {
+      const loadingEl = document.getElementById('loading');
+      const contentEl = document.getElementById('dashboardContent');
+      loadingEl.style.display = 'flex';
+      contentEl.style.display = 'none';
+
+      // Ambil data
+      const raw = await fetchData();
+      if (!raw || raw.length === 0) {
+        loadingEl.innerHTML = '<i class="fa-solid fa-circle-exclamation fa-2x"></i> <span>Tidak ada data dalam rentang tanggal ini.</span>';
+        return;
+      }
+
+      // Simpan data global
+      allData = raw;
+
+      // Update dropdown reseller
+      const sel = document.getElementById('resellerFilter');
+      const currentVal = sel.value;
+      sel.innerHTML = '<option value="">Semua Reseller</option>';
+      const resellers = [...new Set(raw.map(d => d.reseller).filter(Boolean))].sort();
+      resellers.forEach(r => {
+        const opt = document.createElement('option');
+        opt.value = r;
+        opt.textContent = r;
+        sel.appendChild(opt);
+      });
+      sel.value = currentVal; // pertahankan pilihan jika ada
+
+      // Proses dan tampilkan
+      processData(raw);
+
+      loadingEl.style.display = 'none';
+      contentEl.style.display = 'block';
+    }
+
+    // ========================================================
+    // PROSES DATA & RENDER
+    // ========================================================
+    function processData(data) {
+      const rFilter = document.getElementById('resellerFilter').value;
+      const today = new Date();
+      const todayUnix = today.getTime();
+      const p1Start = todayUnix - 7 * 86400000;
+      const p2Start = todayUnix - 14 * 86400000;
+
+      // Filter berdasarkan reseller (jika ada)
+      let filtered = data;
+      if (rFilter) filtered = data.filter(d => d.reseller === rFilter);
+
+      // Inisialisasi agregator
+      let mOmzetAll = 0, mLabaAll = 0, totalGlobalTrx = filtered.length;
+      let tTrend = {}, trendMulti = {}, statusMap = {};
+      let jamTotal = Array(24).fill(0), jamError = Array(24).fill(0);
+      let gatewayMap = {}, dayWeekMap = Array(7).fill(0), prodMap = {};
+      let dailySaldo = {}, resMap = {}, momentumMap = {};
+
+      filtered.forEach(r => {
+        // status
+        const isSukses = r.status && r.status.toLowerCase().includes('sukses');
+        if (isSukses) {
+          mOmzetAll += Number(r.hrg_jual) || 0;
+          mLabaAll += Number(r.laba) || 0;
+        }
+
+        // status kategori
+        let cat = 'Lainnya';
+        if (isSukses) cat = 'Sukses';
+        else if (r.status && r.status.includes('timeout')) cat = 'Timeout';
+        else if (r.status && r.status.includes('gagal')) cat = 'Gagal';
+        else if (r.status && r.status.includes('kosong')) cat = 'Stok Kosong';
+        else if (r.status && r.status.includes('batal')) cat = 'Dibatalkan';
+        else if (r.status && r.status.includes('suspect')) cat = 'Suspect';
+        statusMap[cat] = (statusMap[cat] || 0) + 1;
+
+        // jam
+        const dateObj = new Date(r.tgl_entri);
+        const hour = dateObj.getHours();
+        if (!isNaN(hour)) {
+          jamTotal[hour]++;
+          if (!isSukses) jamError[hour]++;
+        }
+
+        // saldo (untuk top-up)
+        const saldo = Number(r.saldo_akhir) || 0;
+        if (saldo > 0) {
+          const tglStr = r.tgl_entri;
+          const modul = r.modul || 'Lainnya';
+          if (!dailySaldo[modul]) dailySaldo[modul] = {};
+          if (!dailySaldo[modul][tglStr]) dailySaldo[modul][tglStr] = [];
+          dailySaldo[modul][tglStr].push(saldo);
+        }
+
+        // reseller stats
+        const reseller = r.reseller || 'Lainnya';
+        if (!resMap[reseller]) resMap[reseller] = { trx: 0, laba: 0, sukses: 0, lastTgl: 0, activeDays: new Set() };
+        const rs = resMap[reseller];
+        rs.trx++;
+        const unix = new Date(r.tgl_entri).getTime();
+        if (unix > rs.lastTgl) rs.lastTgl = unix;
+        if (isSukses) {
+          rs.laba += Number(r.laba) || 0;
+          rs.sukses++;
+          rs.activeDays.add(r.tgl_entri);
+        }
+
+        // gateway
+        const modul = r.modul || 'Modul Lainnya';
+        if (!gatewayMap[modul]) gatewayMap[modul] = { trx: 0, sukses: 0, gagal: 0, timeout: 0, durSum: 0, durCnt: 0 };
+        const gm = gatewayMap[modul];
+        gm.trx++;
+        if (isSukses) {
+          gm.sukses++;
+          // latency (tgl_status - tgl_entri) dalam detik
+          if (r.tgl_status && r.tgl_entri) {
+            const tStatus = new Date(r.tgl_status).getTime();
+            const tEntri = new Date(r.tgl_entri).getTime();
+            if (!isNaN(tStatus) && !isNaN(tEntri) && tStatus > tEntri) {
+              const dur = (tStatus - tEntri) / 1000;
+              gm.durSum += dur;
+              gm.durCnt++;
+            }
+          }
+        } else if (r.status && r.status.includes('gagal')) {
+          gm.gagal++;
+        } else if (r.status && (r.status.includes('timeout') || r.status.includes('suspect'))) {
+          gm.timeout++;
+        }
+
+        // trend harian (hanya sukses)
+        if (isSukses) {
+          const tglStr = r.tgl_entri;
+          const hargaJual = Number(r.hrg_jual) || 0;
+          tTrend[tglStr] = (tTrend[tglStr] || 0) + hargaJual;
+          const day = new Date(tglStr).getDay();
+          if (!isNaN(day)) dayWeekMap[day] += hargaJual;
+
+          // multi reseller trend
+          if (!trendMulti[reseller]) trendMulti[reseller] = {};
+          trendMulti[reseller][tglStr] = (trendMulti[reseller][tglStr] || 0) + hargaJual;
+
+          // produk
+          const produk = r.produk || 'Lainnya';
+          if (!prodMap[produk]) prodMap[produk] = { vol: 0, hBeli: 0, laba: 0 };
+          const pm = prodMap[produk];
+          pm.vol++;
+          pm.hBeli += Number(r.hrg_beli) || 0;
+          pm.laba += Number(r.laba) || 0;
+        }
+
+        // momentum (untuk velocity)
+        if (!momentumMap[reseller]) momentumMap[reseller] = { p1: 0, p2: 0, prodMix: {} };
+        const mm = momentumMap[reseller];
+        if (unix >= p1Start && unix <= todayUnix) mm.p1++;
+        else if (unix >= p2Start && unix < p1Start) mm.p2++;
+        const prod = r.produk || 'Lainnya';
+        mm.prodMix[prod] = (mm.prodMix[prod] || 0) + 1;
+      });
+
+      // ===== UPDATE KPI =====
+      document.getElementById('kpiOmzetTotal').innerText = rp(mOmzetAll);
+      document.getElementById('kpiLabaTotal').innerText = rp(mLabaAll);
+      document.getElementById('kpiTrxComp').innerText = `${totalGlobalTrx.toLocaleString('id-ID')}`;
+
+      // ===== GRAFIK =====
+      const tKeys = Object.keys(tTrend).sort();
+      // Trend global
+      drawChart('c-trendTotal', 'line', tKeys, [{
+        label: 'Omzet',
+        data: tKeys.map(k => tTrend[k]),
+        borderColor: '#8B5CF6',
+        backgroundColor: 'rgba(139,92,246,0.1)',
+        fill: true,
+        tension: 0.3
+      }]);
+
+      // Trend multi reseller (max 10 reseller teratas)
+      renderTrendMultiChart(tKeys, trendMulti);
+
+      // Status doughnut
+      const sColor = { 'Sukses': '#10B981', 'Timeout': '#F59E0B', 'Gagal': '#EF4444', 'Stok Kosong': '#64748B', 'Dibatalkan': '#991B1B', 'Suspect': '#D946EF' };
+      const statusLabels = Object.keys(statusMap);
+      drawChart('c-status', 'doughnut', statusLabels, [{
+        data: Object.values(statusMap),
+        backgroundColor: statusLabels.map(l => sColor[l] || '#94A3B8'),
+        borderWidth: 2,
+        borderColor: '#fff'
+      }]);
+
+      // Dual axis (jam)
+      const errRates = jamTotal.map((t, i) => t > 0 ? (jamError[i] / t) * 100 : 0);
+      drawChartDual('c-dualAxis', Array.from({ length: 24 }, (_, i) => i + ':00'), jamTotal, errRates);
+
+      // Tabel gateway
+      const gatewayKeys = Object.keys(gatewayMap).sort((a, b) => gatewayMap[b].trx - gatewayMap[a].trx);
+      let htmlGateway = '';
+      gatewayKeys.forEach(k => {
+        const g = gatewayMap[k];
+        const sr = g.trx > 0 ? (g.sukses / g.trx) * 100 : 0;
+        const lat = g.durCnt > 0 ? (g.durSum / g.durCnt).toFixed(1) : '-';
+        const eff = (sr > 85 && g.durCnt > 0 && (g.durSum / g.durCnt) < 10) ? '<span class="badge bg-g">Optimal</span>' : '<span class="badge bg-r">Warning</span>';
+        htmlGateway += `<tr><td><b>${k}</b></td><td>${g.trx}</td><td><span style="color:var(--success); font-weight:700;">${g.sukses}</span></td><td><span style="color:var(--danger);">${g.gagal}</span></td><td><span style="color:var(--warning);">${g.timeout}</span></td><td><span class="badge ${sr>80?'bg-g':'bg-r'}">${sr.toFixed(1)}%</span></td><td>${lat}</td><td>${eff}</td></tr>`;
+      });
+      document.getElementById('tbl-gateway').innerHTML = htmlGateway || '<tr><td colspan="8" style="text-align:center; color:gray;">Tidak ada data modul.</td></tr>';
+
+      // Pola hari
+      drawChart('c-dayWeek', 'bar', getDaysArr(), [{ label: 'Omzet', data: dayWeekMap, backgroundColor: '#06B6D4', borderRadius: 6 }]);
+
+      // Zombie products
+      const prodKeys = Object.keys(prodMap);
+      let zombieHtml = '';
+      prodKeys.forEach(p => {
+        const pd = prodMap[p];
+        const roi = pd.hBeli > 0 ? (pd.laba / pd.hBeli) * 100 : 0;
+        if (pd.vol > 3 && roi < 0.5) {
+          zombieHtml += `<tr><td><b>${p}</b></td><td>${pd.vol}</td><td>${rp(pd.hBeli/pd.vol)}</td><td><span class="badge bg-r">${roi.toFixed(2)}%</span></td></tr>`;
+        }
+      });
+      document.getElementById('tbl-zombie').innerHTML = zombieHtml || '<tr><td colspan="4" style="color:gray; text-align:center; padding:15px;">Seluruh margin produk sehat.</td></tr>';
+
+      // Top-up
+      let tHtml = '';
+      const aggTopupDaily = {};
+      Object.keys(dailySaldo).sort().forEach(modulName => {
+        const sdKeys = Object.keys(dailySaldo[modulName]).sort();
+        for (let i = 1; i < sdKeys.length; i++) {
+          const prevDate = sdKeys[i - 1];
+          const currDate = sdKeys[i];
+          const arrP = dailySaldo[modulName][prevDate];
+          const arrC = dailySaldo[modulName][currDate];
+          const avgP = arrP.reduce((a, b) => a + b, 0) / arrP.length;
+          const avgC = arrC.reduce((a, b) => a + b, 0) / arrC.length;
+          if (avgC > avgP) {
+            const nominal = avgC - avgP;
+            aggTopupDaily[currDate] = (aggTopupDaily[currDate] || 0) + nominal;
+            tHtml += `<div class="alert a-info" style="border:none; padding:10px 14px;"><i class="fa-solid fa-arrow-up-right-dots"></i> <b style="min-width:75px;">${currDate}</b> <span class="badge bg-violet" style="margin: 0 8px;">${modulName}</span> +${rp(nominal)}</div>`;
+          }
+        }
+      });
+      document.getElementById('topupBox').innerHTML = tHtml || '<div style="font-size:11px; color:gray; text-align:center; padding:15px;">Tidak ada penambahan saldo terdeteksi.</div>';
+
+      const topupDates = Object.keys(aggTopupDaily).sort();
+      const topupValues = topupDates.map(d => aggTopupDaily[d]);
+      drawChart('c-topupTrend', 'bar', topupDates, [{ label: 'Total Top-Up', data: topupValues, backgroundColor: '#06B6D4', borderRadius: 4 }]);
+
+      // Velocity
+      const velKeys = Object.keys(momentumMap).sort((a, b) => momentumMap[b].p1 - momentumMap[a].p1);
+      let vHtml = '';
+      velKeys.forEach(k => {
+        const m = momentumMap[k];
+        if (m.p1 === 0 && m.p2 === 0) return;
+        const growth = m.p2 > 0 ? ((m.p1 - m.p2) / m.p2) * 100 : 100;
+        let badge = '';
+        if (m.p2 === 0) badge = '<span class="badge bg-g">New</span>';
+        else if (growth < -20) badge = `<span class="badge bg-r">Drop ${growth.toFixed(0)}%</span>`;
+        else if (growth > 20) badge = `<span class="badge bg-g">Naik +${growth.toFixed(0)}%</span>`;
+        else badge = '<span class="badge bg-violet">Stabil</span>';
+        const mixKeys = Object.keys(m.prodMix);
+        const mix = mixKeys.length > 0 ? mixKeys.reduce((a, b) => m.prodMix[a] > m.prodMix[b] ? a : b) : '-';
+        vHtml += `<tr><td><b>${k}</b></td><td>${m.p1}</td><td>${m.p2}</td><td>${badge}</td><td>${mix}</td></tr>`;
+      });
+      document.getElementById('tbl-velocity').innerHTML = vHtml.slice(0, 1500) || '<tr><td colspan="5" style="text-align:center; color:gray;">Belum cukup data transaksi.</td></tr>';
+
+      // RFM
+      const rfmKeys = Object.keys(resMap).sort((a, b) => resMap[b].trx - resMap[a].trx);
+      let rfmHtml = '';
+      rfmKeys.forEach(k => {
+        const r = resMap[k];
+        const daysAgo = Math.floor((todayUnix - r.lastTgl) / 86400000);
+        const tier = (r.trx > 30 && daysAgo <= 3) ? '<span class="badge bg-y">VIP Member</span>' : (daysAgo > 14 ? '<span class="badge bg-r">Sleeping</span>' : '<span class="badge bg-violet">Regular</span>');
+        const actDays = r.activeDays.size > 0 ? r.activeDays.size : 1;
+        const avgDaily = (r.trx / actDays).toFixed(1);
+        rfmHtml += `<tr><td><b>${k}</b></td><td>${tier}</td><td>${r.trx}</td><td>${rp(r.laba)}</td><td>${avgDaily} / hari</td><td>${daysAgo===0?'Hari ini':daysAgo+' hr lalu'}</td></tr>`;
+      });
+      document.getElementById('tbl-rfm').innerHTML = rfmHtml.slice(0, 1500) || '<tr><td colspan="6" style="text-align:center; color:gray;">Data kosong.</td></tr>';
+    }
+
+    // ========================================================
+    // FUNGSI GRAFIK
+    // ========================================================
+    function drawChart(id, type, labels, datasets) {
+      const canvas = document.getElementById(id);
+      if (!canvas) return;
+      if (charts[id]) charts[id].destroy();
+      if (!labels || labels.length === 0) return;
+      try {
+        charts[id] = new Chart(canvas, {
+          type: type,
+          data: { labels, datasets },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: (type === 'doughnut'), position: 'right', labels: { boxWidth: 12, usePointStyle: true } }
+            },
+            scales: (type === 'doughnut' ? undefined : { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: '#F1F5F9' } } })
+          }
+        });
+      } catch (e) { console.warn('Chart error:', id, e); }
+    }
+
+    function drawChartDual(id, labels, data1, data2) {
+      const canvas = document.getElementById(id);
+      if (!canvas) return;
+      if (charts[id]) charts[id].destroy();
+      if (!labels || labels.length === 0) return;
+      try {
+        charts[id] = new Chart(canvas, {
+          type: 'bar',
+          data: {
+            labels,
+            datasets: [
+              { label: 'Volume Trx', data: data1, backgroundColor: '#EDE9FE', borderRadius: 4, yAxisID: 'y' },
+              { label: 'Error Rate %', data: data2, type: 'line', borderColor: '#EF4444', tension: 0.3, yAxisID: 'y1' }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { grid: { display: false } },
+              y: { type: 'linear', position: 'left', grid: { color: '#F1F5F9' } },
+              y1: { type: 'linear', position: 'right', grid: { drawOnChartArea: false }, max: 100 }
+            }
+          }
+        });
+      } catch (e) { console.warn('Dual chart error:', id, e); }
+    }
+
+    function renderTrendMultiChart(labels, resellerTrendData) {
+      const id = 'c-trendMulti';
+      const canvas = document.getElementById(id);
+      if (!canvas) return;
+      if (charts[id]) charts[id].destroy();
+      if (!labels || labels.length === 0) return;
+
+      // Ambil top 5 reseller berdasarkan total omzet
+      const sorted = Object.keys(resellerTrendData).sort((a, b) => {
+        const sumA = Object.values(resellerTrendData[a]).reduce((s, v) => s + v, 0);
+        const sumB = Object.values(resellerTrendData[b]).reduce((s, v) => s + v, 0);
+        return sumB - sumA;
+      }).slice(0, 5);
+
+      const palette = ['#8B5CF6', '#D946EF', '#06B6D4', '#F59E0B', '#10B981'];
+      const datasets = sorted.map((name, idx) => ({
+        label: name,
+        data: labels.map(d => resellerTrendData[name][d] || 0),
+        borderColor: palette[idx % palette.length],
+        backgroundColor: 'transparent',
+        tension: 0.3,
+        borderWidth: 2,
+        pointRadius: 1,
+        fill: false
+      }));
+
+      try {
+        charts[id] = new Chart(canvas, {
+          type: 'line',
+          data: { labels, datasets },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom', labels: { boxWidth: 8, font: { size: 10 } } } },
+            scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: '#F1F5F9' } } }
+          }
+        });
+      } catch (e) { console.warn('Trend multi error:', e); }
+    }
+
+    // ========================================================
+    // INISIALISASI
+    // ========================================================
+    function init() {
+      const today = new Date();
+      document.getElementById('startDate').value = toDateInput(new Date(today.getFullYear(), today.getMonth(), 1));
+      document.getElementById('endDate').value = toDateInput(today);
+      runEngine();
+    }
+
+    window.onload = init;
+  </script>
+</body>
+</html>
