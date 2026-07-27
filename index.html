@@ -11,7 +11,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    /* ===== STYLE (SAMA) ===== */
+    /* ===== STYLE (sama seperti sebelumnya) ===== */
     * { margin:0; padding:0; box-sizing:border-box; }
     :root {
       --primary: #7c3aed;
@@ -158,10 +158,9 @@
     // ==========================================================
     // KONFIGURASI SUPABASE (GANTI DENGAN MILIK ANDA)
     // ==========================================================
-    const SUPABASE_URL = 'https://smzvlyhfqgvocqckudss.supabase.co';      // Ganti!
-    const SUPABASE_ANON_KEY = 'sb_publishable_kwTA1M0rLb4sy-wuRWFGlQ_sbawszSM'; // Ganti!
+    const SUPABASE_URL = 'https://smzvlyhfqgvocqckudss.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_kwTA1M0rLb4sy-wuRWFGlQ_sbawszSM';
 
-    // Gunakan variabel global 'supabase' yang disediakan oleh CDN script
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // ==========================================================
@@ -187,45 +186,24 @@
     }
 
     // ==========================================================
-    // FETCH DATA DARI MATERIALIZED TABLES (PARALLEL)
+    // FETCH DATA DARI MATERIALIZED TABLES (ambil semua, filter client)
     // ==========================================================
-    async function fetchAllViews(start, end) {
-      // Semua query paralel menggunakan Promise.all
+    async function fetchAllViews() {
       const [
         dailyRes, resellerRes, gatewayRes, productRes,
         hourlyRes, topupRes, dayWeekRes, resellerDailyRes, weeklyRes
       ] = await Promise.all([
-        // daily_summary_materialized
-        supabaseClient.from('daily_summary_materialized').select('*')
-          .gte('tanggal', start || '1900-01-01')
-          .lte('tanggal', end || '3000-01-01')
-          .order('tanggal', { ascending: true }),
-        // reseller_summary_materialized
+        supabaseClient.from('daily_summary_materialized').select('*').order('tanggal', { ascending: true }),
         supabaseClient.from('reseller_summary_materialized').select('*'),
-        // gateway_summary_materialized
         supabaseClient.from('gateway_summary_materialized').select('*'),
-        // product_summary_materialized
         supabaseClient.from('product_summary_materialized').select('*'),
-        // hourly_stats_materialized
         supabaseClient.from('hourly_stats_materialized').select('*').order('jam', { ascending: true }),
-        // topup_summary_materialized
-        supabaseClient.from('topup_summary_materialized').select('*')
-          .gte('tanggal', start || '1900-01-01')
-          .lte('tanggal', end || '3000-01-01')
-          .order('tanggal', { ascending: true }),
-        // day_of_week_summary_materialized
+        supabaseClient.from('topup_summary_materialized').select('*').order('tanggal', { ascending: true }),
         supabaseClient.from('day_of_week_summary_materialized').select('*').order('day_index'),
-        // reseller_daily_summary_materialized
-        supabaseClient.from('reseller_daily_summary_materialized').select('*')
-          .gte('tanggal', start || '1900-01-01')
-          .lte('tanggal', end || '3000-01-01')
-          .limit(500)
-          .order('tanggal', { ascending: true }),
-        // reseller_weekly_summary_materialized
+        supabaseClient.from('reseller_daily_summary_materialized').select('*').order('tanggal', { ascending: true }).limit(500),
         supabaseClient.from('reseller_weekly_summary_materialized').select('*')
       ]);
 
-      // Periksa error
       const errors = [dailyRes, resellerRes, gatewayRes, productRes, hourlyRes, topupRes, dayWeekRes, resellerDailyRes, weeklyRes]
         .filter(r => r.error);
       if (errors.length > 0) {
@@ -258,19 +236,27 @@
       const start = document.getElementById('startDate').value;
       const end = document.getElementById('endDate').value;
 
-      const data = await fetchAllViews(start, end);
+      const data = await fetchAllViews();
       if (!data) {
         loadingEl.innerHTML = '<i class="fa-solid fa-circle-exclamation fa-2x"></i> <span>Gagal mengambil data. Cek log.</span>';
         return;
       }
 
-      // Cek apakah data kosong
-      if (data.daily.length === 0 && data.resellers.length === 0 && data.gateways.length === 0) {
+      // Filter data secara manual berdasarkan tanggal
+      const filteredDaily = data.daily.filter(d => {
+        if (start && d.tanggal < start) return false;
+        if (end && d.tanggal > end) return false;
+        return true;
+      });
+
+      // Jika tidak ada data dalam rentang, tampilkan pesan
+      if (filteredDaily.length === 0) {
         loadingEl.innerHTML = '<i class="fa-solid fa-circle-exclamation fa-2x"></i> <span>Tidak ada data dalam rentang tanggal ini.</span>';
         return;
       }
 
       allData = data;
+      allData.filteredDaily = filteredDaily;
 
       // Update dropdown reseller
       const sel = document.getElementById('resellerFilter');
@@ -285,7 +271,7 @@
       });
       sel.value = currentVal;
 
-      renderDashboard(data);
+      renderDashboard(data, filteredDaily);
 
       loadingEl.style.display = 'none';
       contentEl.style.display = 'block';
@@ -295,10 +281,10 @@
     // ==========================================================
     // RENDER DASHBOARD
     // ==========================================================
-    function renderDashboard(data) {
-      // KPI
+    function renderDashboard(data, filteredDaily) {
+      // KPI menggunakan filteredDaily
       let totalOmzet = 0, totalLaba = 0, totalTrx = 0, totalSukses = 0;
-      data.daily.forEach(d => {
+      filteredDaily.forEach(d => {
         totalOmzet += Number(d.omzet) || 0;
         totalLaba += Number(d.laba) || 0;
         totalTrx += Number(d.total_trx) || 0;
@@ -311,8 +297,8 @@
       document.getElementById('kpiSuccessRate').innerText = successRate + '%';
 
       // Tren Global
-      const tKeys = data.daily.map(d => d.tanggal);
-      const tValues = data.daily.map(d => Number(d.omzet) || 0);
+      const tKeys = filteredDaily.map(d => d.tanggal);
+      const tValues = filteredDaily.map(d => Number(d.omzet) || 0);
       drawChart('c-trendTotal', 'line', tKeys, [{
         label: 'Omzet',
         data: tValues,
@@ -324,10 +310,12 @@
         borderWidth: 2
       }]);
 
-      // Tren Multi Reseller
+      // Tren Multi Reseller – filter resellerDaily berdasarkan tanggal
       const rDaily = data.resellerDaily || [];
       const rMap = {};
       rDaily.forEach(d => {
+        if (start && d.tanggal < start) return;
+        if (end && d.tanggal > end) return;
         if (!rMap[d.reseller]) rMap[d.reseller] = {};
         rMap[d.reseller][d.tanggal] = Number(d.omzet) || 0;
       });
@@ -348,9 +336,9 @@
       }));
       drawChart('c-trendMulti', 'line', tKeys, multiDatasets);
 
-      // Status distribusi
+      // Status distribusi dari filteredDaily
       const statusCount = { sukses:0, gagal:0, timeout:0 };
-      data.daily.forEach(d => {
+      filteredDaily.forEach(d => {
         statusCount.sukses += Number(d.sukses) || 0;
         statusCount.gagal += Number(d.gagal) || 0;
         statusCount.timeout += Number(d.timeout) || 0;
@@ -361,14 +349,14 @@
         borderWidth: 0
       }]);
 
-      // Dual axis
+      // Dual axis (hourly tetap semua data, tidak perlu filter tanggal karena jam tidak terikat tanggal)
       const jamLabels = data.hourly.map(h => String(h.jam).padStart(2,'0') + ':00');
       const jamTotal = data.hourly.map(h => Number(h.total_trx) || 0);
       const jamError = data.hourly.map(h => Number(h.error_trx) || 0);
       const errRate = jamTotal.map((t,i) => t>0 ? (jamError[i]/t)*100 : 0);
       drawChartDual('c-dualAxis', jamLabels, jamTotal, errRate);
 
-      // Gateway table
+      // Gateway table (semua data, tidak perlu filter)
       const gateways = data.gateways || [];
       let gwHtml = '';
       gateways.sort((a,b) => b.total_trx - a.total_trx);
@@ -380,11 +368,18 @@
       });
       document.getElementById('tbl-gateway').innerHTML = gwHtml || '<tr><td colspan="8" style="text-align:center;color:gray;">Tidak ada data gateway.</td></tr>';
 
-      // Pola hari
+      // Pola hari (menggunakan filteredDaily)
       const dayData = Array(7).fill(0);
-      (data.dayWeek || []).forEach(d => {
-        const idx = Number(d.day_index);
-        if (idx>=0 && idx<7) dayData[idx] = Number(d.omzet) || 0;
+      filteredDaily.forEach(d => {
+        // Kita perlu mapping tanggal ke hari, tapi kita tidak punya day_index di filteredDaily.
+        // Kita bisa gunakan data.dayWeek yang sudah agregat, tapi kita filter berdasarkan tanggal dari daily.
+        // Karena dayWeek sudah agregat dari seluruh data, sebaiknya kita hitung ulang dari filteredDaily.
+        // Untuk sederhana, kita gunakan data.dayWeek yang sudah ada (tidak difilter tanggal) – tapi ini akan bias.
+        // Lebih baik kita buat ulang dari filteredDaily.
+        // Kita akan hitung day_index dari tanggal.
+        const dateObj = new Date(d.tanggal);
+        const dayIdx = dateObj.getDay();
+        dayData[dayIdx] += Number(d.omzet) || 0;
       });
       drawChart('c-dayWeek', 'bar', hariIndo, [{
         label: 'Omzet',
@@ -393,7 +388,7 @@
         borderRadius: 6
       }]);
 
-      // Zombie
+      // Zombie (semua data)
       const products = data.products || [];
       let zombieHtml = '';
       products.forEach(p => {
@@ -407,10 +402,12 @@
       });
       document.getElementById('tbl-zombie').innerHTML = zombieHtml || '<tr><td colspan="4" style="text-align:center;color:gray;padding:15px;">Semua produk sehat.</td></tr>';
 
-      // Top-up
+      // Top-up (filter berdasarkan tanggal)
       const topupData = data.topup || [];
       const topupMap = {};
       topupData.forEach(t => {
+        if (start && t.tanggal < start) return;
+        if (end && t.tanggal > end) return;
         const date = t.tanggal;
         const modul = t.modul;
         const avg = Number(t.avg_saldo) || 0;
@@ -441,7 +438,7 @@
         borderRadius: 4
       }]);
 
-      // Velocity
+      // Velocity (filter tanggal tidak relevan, karena weekly summary sudah agregat)
       const weekly = data.resellerWeekly || [];
       const weeklyMap = {};
       weekly.forEach(w => {
@@ -463,7 +460,7 @@
       });
       document.getElementById('tbl-velocity').innerHTML = velHtml.slice(0,2000) || '<tr><td colspan="5" style="text-align:center;color:gray;">Data belum cukup.</td></tr>';
 
-      // RFM
+      // RFM (reseller summary semua data, filter reseller di client)
       let rfmHtml = '';
       const resellerFilter = document.getElementById('resellerFilter').value;
       const list = resellerFilter ? data.resellers.filter(r => r.reseller === resellerFilter) : data.resellers;
@@ -481,7 +478,7 @@
     }
 
     // ==========================================================
-    // FUNGSI CHART
+    // FUNGSI CHART (sama)
     // ==========================================================
     function drawChart(id, type, labels, datasets) {
       const canvas = document.getElementById(id);
