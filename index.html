@@ -10,7 +10,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    /* ===== STYLE SAMA SEPERTI SEBELUMNYA ===== */
+    /* ===== STYLE (SAMA SEPERTI SEBELUMNYA) ===== */
     * { margin:0; padding:0; box-sizing:border-box; }
     :root {
       --primary: #7c3aed;
@@ -155,12 +155,17 @@
   </div>
   <script>
     // ==========================================================
-    // KONFIGURASI SUPABASE
+    // KONFIGURASI SUPABASE (GANTI DENGAN MILIK ANDA)
     // ==========================================================
-    const SUPABASE_URL = 'https://smzvlyhfqgvocqckudss.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_kwTA1M0rLb4sy-wuRWFGlQ_sbawszSM';
-    const supabase = supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const SUPABASE_URL = 'https://smzvlyhfqgvocqckudss.supabase.co';      // Ganti!
+    const SUPABASE_ANON_KEY = 'sb_publishable_kwTA1M0rLb4sy-wuRWFGlQ_sbawszSM'; // Ganti!
 
+    // Gunakan nama variabel yang unik untuk menghindari konflik
+    const supabaseClient = supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // ==========================================================
+    // VARIABEL GLOBAL
+    // ==========================================================
     let charts = {};
     let allData = {};
 
@@ -184,31 +189,42 @@
     // FETCH DATA DARI MATERIALIZED TABLES (PARALLEL)
     // ==========================================================
     async function fetchAllViews(start, end) {
+      // Semua query paralel menggunakan Promise.all
       const [
         dailyRes, resellerRes, gatewayRes, productRes,
         hourlyRes, topupRes, dayWeekRes, resellerDailyRes, weeklyRes
       ] = await Promise.all([
-        supabase.from('daily_summary_materialized').select('*')
+        // daily_summary_materialized
+        supabaseClient.from('daily_summary_materialized').select('*')
           .gte('tanggal', start || '1900-01-01')
           .lte('tanggal', end || '3000-01-01')
           .order('tanggal', { ascending: true }),
-        supabase.from('reseller_summary_materialized').select('*'),
-        supabase.from('gateway_summary_materialized').select('*'),
-        supabase.from('product_summary_materialized').select('*'),
-        supabase.from('hourly_stats_materialized').select('*').order('jam', { ascending: true }),
-        supabase.from('topup_summary_materialized').select('*')
+        // reseller_summary_materialized
+        supabaseClient.from('reseller_summary_materialized').select('*'),
+        // gateway_summary_materialized
+        supabaseClient.from('gateway_summary_materialized').select('*'),
+        // product_summary_materialized
+        supabaseClient.from('product_summary_materialized').select('*'),
+        // hourly_stats_materialized
+        supabaseClient.from('hourly_stats_materialized').select('*').order('jam', { ascending: true }),
+        // topup_summary_materialized
+        supabaseClient.from('topup_summary_materialized').select('*')
           .gte('tanggal', start || '1900-01-01')
           .lte('tanggal', end || '3000-01-01')
           .order('tanggal', { ascending: true }),
-        supabase.from('day_of_week_summary_materialized').select('*').order('day_index'),
-        supabase.from('reseller_daily_summary_materialized').select('*')
+        // day_of_week_summary_materialized
+        supabaseClient.from('day_of_week_summary_materialized').select('*').order('day_index'),
+        // reseller_daily_summary_materialized
+        supabaseClient.from('reseller_daily_summary_materialized').select('*')
           .gte('tanggal', start || '1900-01-01')
           .lte('tanggal', end || '3000-01-01')
           .limit(500)
           .order('tanggal', { ascending: true }),
-        supabase.from('reseller_weekly_summary_materialized').select('*')
+        // reseller_weekly_summary_materialized
+        supabaseClient.from('reseller_weekly_summary_materialized').select('*')
       ]);
 
+      // Periksa error
       const errors = [dailyRes, resellerRes, gatewayRes, productRes, hourlyRes, topupRes, dayWeekRes, resellerDailyRes, weeklyRes]
         .filter(r => r.error);
       if (errors.length > 0) {
@@ -243,14 +259,13 @@
 
       const data = await fetchAllViews(start, end);
       if (!data) {
-        loadingEl.innerHTML = '<i class="fa-solid fa-circle-exclamation fa-2x"></i> <span>Gagal mengambil data. Periksa konsol.</span>';
+        loadingEl.innerHTML = '<i class="fa-solid fa-circle-exclamation fa-2x"></i> <span>Gagal mengambil data. Cek log.</span>';
         return;
       }
 
-      // Jika materialized kosong, coba fallback ke view biasa (peringatan)
-      if (data.daily.length === 0) {
-        console.warn('Materialized tables kosong. Pastikan refresh_all_summaries() sudah dijalankan.');
-        loadingEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation fa-2x"></i> <span>Data materialized kosong. Jalankan refresh_all_summaries() di Supabase.</span>';
+      // Cek apakah data kosong
+      if (data.daily.length === 0 && data.resellers.length === 0 && data.gateways.length === 0) {
+        loadingEl.innerHTML = '<i class="fa-solid fa-circle-exclamation fa-2x"></i> <span>Tidak ada data dalam rentang tanggal ini.</span>';
         return;
       }
 
